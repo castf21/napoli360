@@ -1,6 +1,7 @@
 // Impostazioni del prototipo. Posizioni da OpenStreetMap; l'abbinamento Molo B = pontile 9 è indicativo.
 window.N360 = {
   cesium: "https://cdn.jsdelivr.net/npm/cesium@1.123.0/Build/Cesium/",
+  ionToken: "",          // token Cesium ion: attiva il 3D fotorealistico (Google Photorealistic 3D Tiles)
   view: { lon: 14.2545, lat: 40.8381, height: 380, heading: 25, pitch: -40 },
   start: { name: "Metro Municipio", lon: 14.2534939, lat: 40.8399383 },          // OSM node/8450070548
   dest:  { name: "Molo B", sub: "pontile 9 · aliscafo per Procida 10:40", lon: 14.2550166, lat: 40.8377482 }, // OSM node/10072475980

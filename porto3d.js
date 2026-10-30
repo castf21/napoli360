@@ -12,7 +12,7 @@
     done: '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>'
   };
 
-  // ---------- Mappa: base chiara CARTO (dati OSM) per far risaltare 3D e percorso ----------
+  // ---------- Mappa base: immagini satellitari (usate se il 3D fotorealistico non è disponibile) ----------
   C.Ion.defaultAccessToken = undefined;
   const viewer = new C.Viewer("map", {
     baseLayer: new C.ImageryLayer(new C.UrlTemplateImageryProvider({
@@ -29,11 +29,24 @@
   sc.screenSpaceCameraController.minimumZoomDistance = 40; sc.screenSpaceCameraController.maximumZoomDistance = 3000;
   viewer.resolutionScale = Math.min(window.devicePixelRatio || 1, 1.5);
 
+  // ---------- Modalità fotorealistica: 3D di Google tramite Cesium ion (se c'è il token) ----------
+  let PHOTO = false, H0 = 0;
+  if (CFG.ionToken) {
+    try {
+      C.Ion.defaultAccessToken = CFG.ionToken;
+      const ts = await C.Cesium3DTileset.fromIonAssetId(2275207, { showCreditsOnScreen: true, maximumScreenSpaceError: 12 });
+      sc.primitives.add(ts); sc.globe.show = false; PHOTO = true; H0 = 47; document.body.classList.add("photo");
+      const probe = C.Cartographic.fromDegrees(CFG.dest.lon - 0.0003, CFG.dest.lat + 0.0003);
+      const sampled = await Promise.race([sc.sampleHeightMostDetailed([probe]).then((r) => r[0].height), new Promise((r) => setTimeout(() => r(null), 8000))]);
+      if (sampled && isFinite(sampled) && sampled > 20 && sampled < 90) H0 = sampled;
+    } catch (e) { console.warn("3D fotorealistico non disponibile", e); toast("3D fotorealistico non disponibile: uso la mappa standard"); }
+  }
+
   // ---------- Dati reali ----------
   let gj;
   try { gj = await (await fetch("data/beverello.geojson", { cache: "no-cache" })).json(); }
   catch (e) { $("#r-now").textContent = "Dati in aggiornamento"; $("#r-sub").textContent = "Riprova tra qualche minuto."; return; }
-  const pos = (ring, h = 0) => C.Cartesian3.fromDegreesArrayHeights(ring.flatMap((c) => [c[0], c[1], h]));
+  const pos = (ring, h = 0) => C.Cartesian3.fromDegreesArrayHeights(ring.flatMap((c) => [c[0], c[1], h + H0]));
   const num = (v) => { const n = parseFloat(String(v || "").replace(",", ".")); return isFinite(n) ? n : null; };
   const heightOf = (p) => num(p.height) || (num(p["building:levels"]) ? num(p["building:levels"]) * 3.4 : null) || (p.building === "roof" ? 6 : 12);
   const R = 6371000, rad = Math.PI / 180;
@@ -44,7 +57,7 @@
   for (const f of gj.features) {
     const p = f.properties, g = f.geometry;
     const polys = g.type === "Polygon" ? [g.coordinates] : g.type === "MultiPolygon" ? g.coordinates : null;
-    if (p.building && polys) {
+    if (p.building && polys && !PHOTO) {
       const terminal = p.amenity === "ferry_terminal" || /terminal|marittim|beverello/i.test(p.name || "");
       const far = dist(polys[0][0][0], center) > 450;
       for (const pc of polys) buildings.push(viewer.entities.add({ polygon: {
@@ -61,7 +74,7 @@
       continue;
     }
   }
-  const ferries = gj.features.filter((f) => f.properties.route === "ferry" && f.geometry.type === "LineString").map((f) =>
+  const ferries = gj.features.filter((f) => !PHOTO && f.properties.route === "ferry" && f.geometry.type === "LineString").map((f) =>
     viewer.entities.add({ polyline: { positions: pos(f.geometry.coordinates), width: 2, clampToGround: true,
       material: new C.PolylineDashMaterialProperty({ color: col("#0E7BC4", .45), dashLength: 12 }) } }));
 
@@ -123,24 +136,25 @@
   $("#r-steps").innerHTML = steps.map((x, i) => `<li class="${x.last ? "last" : ""}"><span>${i + 1}</span>${x.txt}</li>`).join("");
 
   // ---------- Percorso e indicatori ----------
-  viewer.entities.add({ polyline: { positions: pos(route), width: 12, clampToGround: true,
+  viewer.entities.add({ polyline: { positions: pos(route), width: 12, clampToGround: true, classificationType: C.ClassificationType.BOTH,
     material: new C.PolylineOutlineMaterialProperty({ color: col("#0E7BC4"), outlineColor: C.Color.WHITE, outlineWidth: 3 }) } });
-  const tag = (pt, text, bg, fg, h, near) => viewer.entities.add({ position: C.Cartesian3.fromDegrees(pt[0], pt[1], h),
+  const tag = (pt, text, bg, fg, h, near) => viewer.entities.add({ position: C.Cartesian3.fromDegrees(pt[0], pt[1], h + H0),
     label: { text, font: "700 13px Inter, sans-serif", fillColor: col(fg), showBackground: true, backgroundColor: col(bg), backgroundPadding: new C.Cartesian2(9, 6),
       verticalOrigin: C.VerticalOrigin.BOTTOM, disableDepthTestDistance: Number.POSITIVE_INFINITY,
       distanceDisplayCondition: near ? new C.DistanceDisplayCondition(0, near) : undefined } });
   // partenza
-  viewer.entities.add({ position: C.Cartesian3.fromDegrees(startPt[0], startPt[1], 1), point: { pixelSize: 14, color: col("#0A1A33"), outlineColor: C.Color.WHITE, outlineWidth: 3, disableDepthTestDistance: Number.POSITIVE_INFINITY } });
+  viewer.entities.add({ position: C.Cartesian3.fromDegrees(startPt[0], startPt[1], 1 + H0), point: { pixelSize: 14, color: col("#0A1A33"), outlineColor: C.Color.WHITE, outlineWidth: 3, disableDepthTestDistance: Number.POSITIVE_INFINITY } });
   tag(startPt, "M  " + CFG.start.name, "#0A1A33", "#FFFFFF", 14);
   // altri pontili
   for (const d of CFG.docks) {
-    viewer.entities.add({ position: C.Cartesian3.fromDegrees(d.lon, d.lat, 2), point: { pixelSize: 8, color: C.Color.WHITE, outlineColor: col("#4E5D73"), outlineWidth: 2, disableDepthTestDistance: Number.POSITIVE_INFINITY, distanceDisplayCondition: new C.DistanceDisplayCondition(0, 350) } });
+    viewer.entities.add({ position: C.Cartesian3.fromDegrees(d.lon, d.lat, 2 + H0), point: { pixelSize: 8, color: C.Color.WHITE, outlineColor: col("#4E5D73"), outlineWidth: 2, disableDepthTestDistance: Number.POSITIVE_INFINITY, distanceDisplayCondition: new C.DistanceDisplayCondition(0, 350) } });
     tag([d.lon, d.lat], d.name.replace("Pontile ", "P"), "#FFFFFF", "#4E5D73", 6, 140);
   }
   // Molo B: colonna gialla + etichetta
-  viewer.entities.add({ position: C.Cartesian3.fromDegrees(destPt[0], destPt[1], 14), cylinder: { length: 28, topRadius: 0, bottomRadius: 5, material: col("#F2B33D", .9) } });
-  viewer.entities.add({ position: C.Cartesian3.fromDegrees(destPt[0], destPt[1], 0.5), ellipse: { semiMajorAxis: 14, semiMinorAxis: 14, height: 0.5, material: col("#F2B33D", .35) } });
-  tag(destPt, "MOLO B · Procida 10:40", "#F2B33D", "#0A1A33", 32);
+  viewer.entities.add({ position: C.Cartesian3.fromDegrees(destPt[0], destPt[1], 16 + H0), cylinder: { length: 28, topRadius: 0, bottomRadius: 5, material: col("#F2B33D", .9) } });
+  viewer.entities.add({ position: C.Cartesian3.fromDegrees(destPt[0], destPt[1], 0.5), ellipse: { semiMajorAxis: 14, semiMinorAxis: 14, classificationType: C.ClassificationType.BOTH, material: col("#F2B33D", .45) } });
+  tag(destPt, "MOLO B · Procida 10:40", "#F2B33D", "#0A1A33", 34);
+  if (PHOTO) $(".tgl").hidden = true;
   $("#t-bld").addEventListener("change", (e) => buildings.forEach((x) => (x.show = e.target.checked)));
 
   // ---------- Camera ----------
@@ -148,13 +162,13 @@
   const overview = (dur = 1.4) => {
     viewer.camera.lookAtTransform(C.Matrix4.IDENTITY);
     const c = C.Cartographic.fromCartesian(routeSphere.center);
-    const target = new C.BoundingSphere(C.Cartesian3.fromRadians(c.longitude, c.latitude - 0.00065 * rad * 1, 0), routeSphere.radius);
+    const target = new C.BoundingSphere(C.Cartesian3.fromRadians(c.longitude, c.latitude - 0.00065 * rad * 1, H0), routeSphere.radius);
     viewer.camera.flyToBoundingSphere(target, { offset: new C.HeadingPitchRange(C.Math.toRadians(345), C.Math.toRadians(-48), routeSphere.radius * 4.2), duration: dur });
   };
   overview(0);
 
   // ---------- Guida simulata ----------
-  const walker = viewer.entities.add({ position: C.Cartesian3.fromDegrees(startPt[0], startPt[1], 2),
+  const walker = viewer.entities.add({ position: C.Cartesian3.fromDegrees(startPt[0], startPt[1], 2 + H0),
     point: { pixelSize: 18, color: col("#0E7BC4"), outlineColor: C.Color.WHITE, outlineWidth: 4, disableDepthTestDistance: Number.POSITIVE_INFINITY },
     label: { text: "Tu", font: "700 12px Inter, sans-serif", fillColor: C.Color.WHITE, showBackground: true, backgroundColor: col("#0E7BC4"),
       pixelOffset: new C.Cartesian2(0, 24), disableDepthTestDistance: Number.POSITIVE_INFINITY } });
@@ -164,7 +178,7 @@
   function tick(ts) {
     if (!t0) t0 = ts;
     const k = Math.min(1, (ts - t0) / (CFG.demoSeconds * 1000)), m = k * total, [lon, lat] = at(m);
-    const p = C.Cartesian3.fromDegrees(lon, lat, 2); walker.position = p;
+    const p = C.Cartesian3.fromDegrees(lon, lat, 2 + H0); walker.position = p;
     const h = ahead(m); if (h !== null) { let d = ((h - head + 540) % 360) - 180; head += d * 0.05; }
     viewer.camera.lookAt(p, new C.HeadingPitchRange(C.Math.toRadians(head), C.Math.toRadians(-32), 110));
     $("#r-bar").style.width = (k * 100).toFixed(1) + "%";

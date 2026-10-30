@@ -75,3 +75,8 @@ html,body{margin:0;height:100%;font-family:Inter,system-ui,sans-serif;color:var(
 .lpin::after{content:"";position:absolute;left:50%;bottom:-8px;margin-left:-8px;border:8px solid transparent;border-bottom:0;border-top-color:var(--sun)}
 .lcard{position:absolute;left:12px;right:12px;bottom:calc(16px + env(safe-area-inset-bottom));background:#fff;border-radius:20px;padding:14px;display:flex;flex-direction:column;gap:8px;z-index:3;box-shadow:0 10px 30px rgba(0,0,0,.3)}
 @media (prefers-reduced-motion:reduce){.plane i{animation:none;opacity:.8}}
+
+.photo .cesium-viewer-bottom{display:block;position:absolute;left:12px;right:auto;bottom:auto;top:calc(150px + env(safe-area-inset-top));opacity:.9;z-index:4;max-width:60%}
+@media (max-width:520px){.photo .cesium-viewer-bottom{top:calc(112px + env(safe-area-inset-top))}}
+.photo .cesium-widget-credits{font-size:9.5px;color:#fff;text-shadow:0 1px 2px rgba(0,0,0,.6)}
+.tgl[hidden]{display:none}
