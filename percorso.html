@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>NAPOLI 360 · Portami qui</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/cesium@1.123.0/Build/Cesium/Widgets/widgets.css">
+<link rel="stylesheet" href="porto3d.css">
+<style>
+.from{position:absolute;left:12px;right:12px;top:calc(112px + env(safe-area-inset-top));z-index:5;display:flex;gap:8px;overflow-x:auto;scrollbar-width:none}
+@media (min-width:521px){.from{top:150px}}
+.from::-webkit-scrollbar{display:none}
+.chip{flex-shrink:0;border:0;border-radius:999px;padding:8px 12px;font:700 12px Inter,sans-serif;background:rgba(255,255,255,.95);color:var(--night);box-shadow:var(--sh);cursor:pointer}
+.chip[aria-pressed="true"]{background:var(--night);color:#fff}
+.legs{display:flex;flex-direction:column;gap:8px;margin:0;padding:0;list-style:none}
+.leg{display:flex;gap:10px;align-items:flex-start;font-size:13.5px}
+.leg .b{min-width:34px;height:26px;border-radius:7px;font-weight:800;font-size:12px;display:flex;align-items:center;justify-content:center;flex-shrink:0;color:#fff}
+.leg .w{background:var(--s2);color:var(--ink2)}
+.leg .t{font-weight:700}.leg .d{font-size:12px;color:var(--ink2);margin-top:2px}
+.leg .nx{font-size:11.5px;color:var(--sea-ink);font-weight:700;margin-top:3px}
+.legs li.now .t{color:var(--sea-ink)}
+</style>
+<script src="config.js"></script>
+<script src="places.js"></script>
+<script>window.CESIUM_BASE_URL = window.N360.cesium;</script>
+<script src="https://cdn.jsdelivr.net/npm/cesium@1.123.0/Build/Cesium/Cesium.js"></script>
+</head>
+<body>
+<div class="stage">
+  <aside class="side">
+    <span class="tag">Portami qui · orari ufficiali</span>
+    <h2>Con i mezzi, in 3D</h2>
+    <p>Il percorso è calcolato sugli orari programmati di ANM (dati GTFS ufficiali, aggiornati ogni notte): metro Linea 1, 2 e 6 e funicolari.</p>
+    <p class="small">Gli orari programmati non tengono conto di scioperi, ritardi o guasti: verifica sul sito ANM.</p>
+  </aside>
+  <div class="device">
+    <div class="screen" id="screen">
+      <div id="map"></div>
+      <header class="top">
+        <div class="bar">
+          <a class="back" href="index.html" id="back" aria-label="Indietro"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg></a>
+          <div class="ttl"><b id="t-dest">Portami qui</b><span id="t-sub">Con i mezzi pubblici</span></div>
+        </div>
+      </header>
+      <nav class="from" id="from" aria-label="Punto di partenza"></nav>
+      <section class="sheet" id="sheet" aria-live="polite">
+        <div class="grab"></div>
+        <div class="head">
+          <div class="dir" id="r-ico"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect width="16" height="16" x="4" y="3" rx="2"/><path d="M4 11h16"/><path d="M12 3v8"/><path d="m8 19-2 3"/><path d="m18 22-2-3"/></svg></div>
+          <div class="txt"><div class="now" id="r-now">Calcolo il percorso…</div><div class="sub" id="r-sub"></div></div>
+          <div class="badge" id="r-badge">—</div>
+        </div>
+        <div class="prog"><div id="r-bar"></div></div>
+        <ol class="legs" id="legs"></ol>
+        <div class="btns"><button class="btn dark" id="b-go">Simula il percorso</button><button class="btn soft" id="b-view">Vista d'insieme</button></div>
+        <p class="foot" id="foot">Orari programmati ANM (GTFS ufficiale) · non includono scioperi o ritardi in tempo reale · mappa © OpenStreetMap contributors · 3D CesiumJS</p>
+      </section>
+      <div class="toast" id="toast" role="status"></div>
+    </div>
+  </div>
+</div>
+<script src="percorso.js"></script>
+</body>
+</html>

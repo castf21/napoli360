@@ -68,6 +68,8 @@
     sel = i; const [name, cat, lat, lon, z, desc, port] = P[i];
     $("#p-cat").textContent = CAT[cat][0]; $("#p-cat").style.color = CAT[cat][1];
     $("#p-name").textContent = name; $("#p-desc").textContent = desc; $("#p-go").hidden = !port;
+    const key = Object.keys(window.N360_PLACES || {}).find((k) => window.N360_PLACES[k].lat === lat && window.N360_PLACES[k].lon === lon);
+    $("#p-route").hidden = port || !key || cat === "mobilita"; if (key) $("#p-route").href = "percorso.html?to=" + key + "&back=mappa3d.html";
     $$(".pbtn").forEach((b) => b.setAttribute("aria-current", String(+b.dataset.i === i)));
     viewer.camera.flyToBoundingSphere(new C.BoundingSphere(C.Cartesian3.fromDegrees(lon, lat, H0 + z), 60),
       { offset: new C.HeadingPitchRange(C.Math.toRadians(cat === "eventi" ? 20 : 0), C.Math.toRadians(-32), 520), duration: 1.6 });

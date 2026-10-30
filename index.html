@@ -328,8 +328,9 @@ h2.hello{margin:0;font-size:28px;line-height:1.15;font-weight:700;letter-spacing
           <div class="ovl" style="color:var(--sea-ink)" id="ev-date"></div>
           <h2 class="hello" style="font-size:24px" id="ev-title"></h2>
           <div class="cap" id="ev-venue"></div>
+          <button class="btn sun" id="ev-go" data-href="percorso.html">Portami qui · metro e orari ufficiali ANM</button>
           <div class="card" style="padding:14px;display:flex;flex-direction:column;gap:10px">
-            <div class="ovl" style="color:var(--ink2)">Come arrivarci</div>
+            <div class="ovl" style="color:var(--ink2)">Come arrivarci in breve</div>
             <div id="ev-route" class="list" style="gap:8px"></div>
             <div class="cap">Percorso indicativo: verifica orari e corse sui siti dei gestori.</div>
           </div>
@@ -549,6 +550,7 @@ Eventi in calendario (fonti pubblicate a ottobre 2026):
 ${ev}
 Luoghi culturali:
 ${pl}
+Funzione "Portami qui" (in Eventi, Cultura e Mappa): calcola il percorso con metro L1, L2, L6 e funicolari sugli orari ufficiali ANM e lo mostra in 3D; suggeriscila quando chiedono come arrivare da qualche parte.
 Avvisi: America's Cup a Napoli dal 22 maggio al 19 luglio 2027, Race Village su Via Caracciolo (chiusa al traffico in quel periodo, piano definitivo da approvare).
 Regole: rispondi in italiano chiaro, cordiale, con al massimo un tocco di napoletano; massimo 120 parole; usa un elenco puntato per percorsi e liste. Non inventare orari, prezzi, numeri di corsa o disponibilità: se non puoi verificarli dillo e indica la fonte ufficiale (ANM, EAV, Trenitalia, compagnie di navigazione, siti dei musei, Comune di Napoli, meteoam.it). Non hai accesso a internet né a dati in tempo reale. Se la domanda esce dal tema di Napoli rispondi brevemente e riporta a come puoi aiutare in città.`;
   }
@@ -748,6 +750,7 @@ Regole: rispondi in italiano chiaro, cordiale, con al massimo un tocco di napole
     $("#ev-date").textContent = d + " " + iso.slice(0, 4); $("#ev-title").textContent = t; $("#ev-venue").textContent = k + " · " + V[v].n;
     $("#ev-route").innerHTML = V[v].r.map(([a, b2], i) => `<div class="step"><span class="n" style="background:var(--sea)">${i + 1}</span><div><div class="t">${a}</div><div class="d">${b2}</div></div></div>`).join("");
     $("#ev-src").innerHTML = `<span>Fonte: ${src}</span>`;
+    $("#ev-go").dataset.href = "percorso.html?to=" + ({ pala: "pala", casa: "pala", mara: "mara", sanc: "sancarlo", ac: "acvillage", are: "arena" })[v];
     $("#saveEv").textContent = saved.has(t) ? "Salvato in La mia Napoli" : "Salva in La mia Napoli";
     go("evento");
   });
@@ -757,19 +760,19 @@ Regole: rispondi in italiano chiaro, cordiale, con al massimo un tocco di napole
 
   // ---- Cultura: luoghi reali ----
   const PLACES = [
-    ["Museo Archeologico Nazionale (MANN)", "Collezione Farnese e reperti di Pompei ed Ercolano, tra cui il mosaico di Alessandro", "Linea 1 · Museo"],
-    ["Cappella Sansevero", "Il Cristo velato di Giuseppe Sanmartino (1753), capolavoro della scultura in marmo", "Centro storico · Linea 1 Dante"],
-    ["Museo e Real Bosco di Capodimonte", "Reggia borbonica con pinacoteca: Caravaggio, Tiziano, Masaccio · parco di oltre 120 ettari", "Bus dal centro"],
-    ["Castel Nuovo · Maschio Angioino", "Castello del XIII secolo con l'arco trionfale aragonese, a due passi dal Molo Beverello", "Linea 1 · Municipio"],
-    ["Teatro di San Carlo", "Inaugurato nel 1737, il più antico teatro d'opera d'Europa ancora in attività", "Linea 1 · Municipio"],
-    ["Palazzo Reale e Piazza del Plebiscito", "Residenza dei re di Napoli affacciata sulla piazza simbolo della città", "Linea 1 · Municipio"],
-    ["Castel dell'Ovo", "Il castello più antico della città, sull'isolotto di Megaride lungo il mare", "Lungomare · Borgo Marinari"],
-    ["Certosa e Museo di San Martino", "Sulla collina del Vomero, con il celebre presepe Cuciniello e vista sul golfo", "Funicolare · Vomero"],
-    ["Napoli Sotterranea", "Cunicoli greco-romani e rifugi della Seconda guerra mondiale sotto il centro storico", "Centro storico"],
-    ["Via San Gregorio Armeno", "La strada dei presepi: botteghe artigiane aperte tutto l'anno, il clou a Natale", "Centro storico · Spaccanapoli"],
-    ["Centro storico di Napoli", "Patrimonio dell'umanità UNESCO dal 1995: Spaccanapoli, Duomo e decumani", "Linea 1 · Dante / Duomo"]
+    ["Museo Archeologico Nazionale (MANN)", "Collezione Farnese e reperti di Pompei ed Ercolano, tra cui il mosaico di Alessandro", "Linea 1 · Museo", "mann"],
+    ["Cappella Sansevero", "Il Cristo velato di Giuseppe Sanmartino (1753), capolavoro della scultura in marmo", "Centro storico · Linea 1 Dante", "sansevero"],
+    ["Museo e Real Bosco di Capodimonte", "Reggia borbonica con pinacoteca: Caravaggio, Tiziano, Masaccio · parco di oltre 120 ettari", "Bus dal centro", "capodimonte"],
+    ["Castel Nuovo · Maschio Angioino", "Castello del XIII secolo con l'arco trionfale aragonese, a due passi dal Molo Beverello", "Linea 1 · Municipio", "castelnuovo"],
+    ["Teatro di San Carlo", "Inaugurato nel 1737, il più antico teatro d'opera d'Europa ancora in attività", "Linea 1 · Municipio", "sancarlo"],
+    ["Palazzo Reale e Piazza del Plebiscito", "Residenza dei re di Napoli affacciata sulla piazza simbolo della città", "Linea 1 · Municipio", "palazzoreale"],
+    ["Castel dell'Ovo", "Il castello più antico della città, sull'isolotto di Megaride lungo il mare", "Lungomare · Borgo Marinari", "castelovo"],
+    ["Certosa e Museo di San Martino", "Sulla collina del Vomero, con il celebre presepe Cuciniello e vista sul golfo", "Funicolare · Vomero", "sanmartino"],
+    ["Napoli Sotterranea", "Cunicoli greco-romani e rifugi della Seconda guerra mondiale sotto il centro storico", "Centro storico", "sotterranea"],
+    ["Via San Gregorio Armeno", "La strada dei presepi: botteghe artigiane aperte tutto l'anno, il clou a Natale", "Centro storico · Spaccanapoli", "sangregorio"],
+    ["Centro storico di Napoli", "Patrimonio dell'umanità UNESCO dal 1995: Spaccanapoli, Duomo e decumani", "Linea 1 · Dante / Duomo", "duomo"]
   ];
-  $("#places").innerHTML = PLACES.map(([t,d,how]) => `<div class="item" style="align-items:flex-start"><span class="ico" style="background:#EFE6D4;color:#7A5C25;flex-shrink:0"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><line x1="3" x2="21" y1="22" y2="22"/><line x1="6" x2="6" y1="18" y2="11"/><line x1="10" x2="10" y1="18" y2="11"/><line x1="14" x2="14" y1="18" y2="11"/><line x1="18" x2="18" y1="18" y2="11"/><polygon points="12 2 20 7 4 7"/></svg></span><div style="min-width:0"><div class="t">${t}</div><div class="d">${d}</div><div class="cap" style="margin-top:4px;color:var(--sea-ink);font-weight:600">${how}</div></div></div>`).join("");
+  $("#places").innerHTML = PLACES.map(([t,d,how,key]) => `<button class="item" data-href="percorso.html?to=${key}" style="align-items:flex-start"><span class="ico" style="background:#EFE6D4;color:#7A5C25;flex-shrink:0"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><line x1="3" x2="21" y1="22" y2="22"/><line x1="6" x2="6" y1="18" y2="11"/><line x1="10" x2="10" y1="18" y2="11"/><line x1="14" x2="14" y1="18" y2="11"/><line x1="18" x2="18" y1="18" y2="11"/><polygon points="12 2 20 7 4 7"/></svg></span><div style="min-width:0"><div class="t">${t}</div><div class="d">${d}</div><div class="cap" style="margin-top:4px;color:var(--sea-ink);font-weight:600">${how}</div><div class="cap" style="margin-top:6px;font-weight:700;color:var(--night)">Portami qui ›</div></div></button>`).join("");
 
   // ---- Informa: avvisi (reali o di esempio, sempre dichiarati) ----
   const ALERTS = [

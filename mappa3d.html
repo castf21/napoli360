@@ -21,6 +21,7 @@
 .pbtn[aria-current="true"]{border-color:var(--night);background:var(--night);color:#fff}
 </style>
 <script src="config.js"></script>
+<script src="places.js"></script>
 <script>window.CESIUM_BASE_URL = window.N360.cesium;</script>
 <script src="https://cdn.jsdelivr.net/npm/cesium@1.123.0/Build/Cesium/Cesium.js"></script>
 </head>
@@ -48,7 +49,7 @@
           <div class="txt"><div class="cat" id="p-cat">Napoli</div><div class="now" id="p-name">Scegli un luogo</div><div class="sub" id="p-desc">Tocca un'etichetta sulla mappa o un luogo qui sotto.</div></div>
         </div>
         <div class="plist" id="plist"></div>
-        <div class="btns"><a class="btn sun" id="p-go" href="porto3d.html" hidden>Guidami al molo</a><button class="btn soft" id="p-all">Vista d'insieme</button></div>
+        <div class="btns"><a class="btn sun" id="p-go" href="porto3d.html" hidden>Guidami al molo</a><a class="btn sun" id="p-route" href="#" hidden>Portami qui</a><button class="btn soft" id="p-all">Vista d'insieme</button></div>
         <p class="foot">Prototipo · posizioni © OpenStreetMap contributors · 3D CesiumJS</p>
       </section>
       <div class="toast" id="toast" role="status"></div>
