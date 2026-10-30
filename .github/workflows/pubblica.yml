@@ -25,7 +25,9 @@ jobs:
         with:
           python-version: "3.12"
       - name: Scarica i dati del Molo Beverello da OpenStreetMap
-        run: python scripts/fetch_osm.py || echo "Dati non aggiornati, uso la copia esistente"
+        run: |
+          python scripts/fetch_osm.py || echo "Dati non aggiornati, uso la copia esistente"
+          python scripts/fetch_poi.py || echo "Luoghi non aggiornati, uso la copia esistente"
       - name: Salva i dati nel repository
         run: |
           git config user.name "github-actions[bot]"
