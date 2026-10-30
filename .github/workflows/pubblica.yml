@@ -29,6 +29,17 @@ jobs:
           python scripts/fetch_osm.py || echo "Dati non aggiornati, uso la copia esistente"
           python scripts/fetch_poi.py || echo "Luoghi non aggiornati, uso la copia esistente"
           python scripts/fetch_gtfs.py || echo "Orari ANM non aggiornati, uso la copia esistente"
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "21"
+      - name: Controllo qualità degli orari (validatore ufficiale MobilityData)
+        continue-on-error: true
+        run: |
+          URL=$(curl -s https://api.github.com/repos/MobilityData/gtfs-validator/releases/latest | python3 -c "import json,sys; r=json.load(sys.stdin); print(next(a['browser_download_url'] for a in r['assets'] if a['name'].endswith('-cli.jar')))")
+          export VALIDATOR_VERSION=$(basename "$URL")
+          curl -sL "$URL" -o /tmp/gtfs-validator-cli.jar
+          python scripts/valida_gtfs.py
       - name: Salva i dati nel repository
         run: |
           git config user.name "github-actions[bot]"

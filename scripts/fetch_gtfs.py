@@ -25,6 +25,7 @@ def main():
         data = get(urls)
         if not data: print("feed non disponibile", name); continue
         z = zipfile.ZipFile(io.BytesIO(data)); srcs.append(name)
+        os.makedirs("/tmp/gtfs", exist_ok=True); open(f"/tmp/gtfs/{name}.zip", "wb").write(data)  # per il controllo qualità
         routes = {r["route_id"]: r for r in rows(z, "routes.txt")}
         cls = {rid: ("rail" if RAIL.get(r.get("route_type", "3").strip(), False) else "bus") for rid, r in routes.items()}
         win = {"rail": [today + datetime.timedelta(d) for d in range(21)], "bus": [today + datetime.timedelta(d) for d in range(2)]}
@@ -66,7 +67,11 @@ def main():
             starts = [base] if tid not in freq else [x for (s0, s1, h) in freq[tid] for x in range(s0, s1, h)]
             for x in starts: p["t"].append([P + ":" + t["service_id"], x])
             for s in seq:
-                if s in stops: out[c]["stops"][P + ":" + s] = {"n": stops[s]["stop_name"].strip(), "lat": round(float(stops[s]["stop_lat"]), 6), "lon": round(float(stops[s]["stop_lon"]), 6)}
+                if s in stops:
+                    o = {"n": stops[s]["stop_name"].strip(), "lat": round(float(stops[s]["stop_lat"]), 6), "lon": round(float(stops[s]["stop_lon"]), 6)}
+                    w = (stops[s].get("wheelchair_boarding") or "").strip()
+                    if w in ("1", "2"): o["w"] = int(w)  # accessibilità dichiarata dall'operatore (1 sì, 2 no)
+                    out[c]["stops"][P + ":" + s] = o
             out[c]["routes"][P + ":" + t["route_id"]] = {"s": (routes[t["route_id"]].get("route_short_name") or "").strip() or (routes[t["route_id"]].get("route_long_name") or "").strip()[:12],
                 "l": (routes[t["route_id"]].get("route_long_name") or "").strip(), "c": (routes[t["route_id"]].get("route_color") or "").strip(), "type": routes[t["route_id"]]["route_type"].strip(), "a": name}
         for (c, _, _), p in pats.items():
