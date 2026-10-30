@@ -326,10 +326,11 @@
   }
   $("#b-go").addEventListener("click", () => { cancelAnimationFrame(raf); t0 = 0; lastK = -1; head = brg(RT.r[0], RT.r[Math.min(3, RT.r.length - 1)]); $("#b-go").textContent = "Guida in corso…"; raf = requestAnimationFrame(tick); });
   $("#b-view").addEventListener("click", () => { cancelAnimationFrame(raf); raf = null; $("#b-go").textContent = mode === "out" ? "Simula il percorso" : "Simula il percorso interno"; overview(); });
-  $("#b-in").addEventListener("click", () => setMode(mode === "out" ? "in" : "out"));
+  // "Entra nel terminal": guida in prima persona dentro la Stazione marittima (cartelli riconosciuti, sala d'attesa, varco)
+  $("#b-in").addEventListener("click", () => { location.href = "index.html#porto"; });
   $("#t-bld")?.addEventListener("change", (e) => outdoorEnts.forEach((x) => { if (x.polygon) x.show = e.target.checked; }));
   if (PHOTO && $(".tgl")) $(".tgl").hidden = true;
 
   intro(); overview(0);
-  if (location.hash === "#interno") setMode("in");
+  if (location.hash === "#interno") location.replace("index.html#porto");
 })();

@@ -821,7 +821,7 @@ Regole: rispondi in italiano chiaro, cordiale, con al massimo un tocco di napole
   const ON_SITE = /github\.io$|^localhost$|^127\./.test(location.hostname);
   document.addEventListener("click", e => { const h = e.target.closest("[data-href]"); if (!h) return; if (ON_SITE) location.href = h.dataset.href; else window.open(SITE + h.dataset.href, "_blank", "noopener"); });
   render("home");
-  if (location.hash === "#porto") go("porto");
+  if (location.hash === "#porto") { go("porto"); const bk = document.querySelector("#v-porto [data-back]"); if (bk) { bk.removeAttribute("data-back"); bk.dataset.href = "porto3d.html"; } }
 })();
 </script>
 
