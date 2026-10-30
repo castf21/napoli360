@@ -16,8 +16,8 @@
   C.Ion.defaultAccessToken = undefined;
   const viewer = new C.Viewer("map", {
     baseLayer: new C.ImageryLayer(new C.UrlTemplateImageryProvider({
-      url: "https://{s}.basemaps.cartocdn.com/rastertiles/voyager_nolabels/{z}/{x}/{y}@2x.png", subdomains: "abcd",
-      tileWidth: 512, tileHeight: 512, maximumLevel: 19, credit: "© OpenStreetMap contributors © CARTO" })),
+      url: "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
+      maximumLevel: 19, credit: "Immagini © Esri, Maxar, Earthstar Geographics" })),
     terrainProvider: new C.EllipsoidTerrainProvider(),
     baseLayerPicker: false, geocoder: false, homeButton: false, sceneModePicker: false, navigationHelpButton: false,
     animation: false, timeline: false, fullscreenButton: false, infoBox: false, selectionIndicator: false
@@ -39,6 +39,7 @@
   const R = 6371000, rad = Math.PI / 180;
   const dist = (a, b) => { const x = (b[0] - a[0]) * rad * Math.cos((a[1] + b[1]) / 2 * rad), y = (b[1] - a[1]) * rad; return Math.sqrt(x * x + y * y) * R; };
   const center = [CFG.dest.lon, CFG.dest.lat];
+  const buildings = [];
 
   for (const f of gj.features) {
     const p = f.properties, g = f.geometry;
@@ -46,18 +47,17 @@
     if (p.building && polys) {
       const terminal = p.amenity === "ferry_terminal" || /terminal|marittim|beverello/i.test(p.name || "");
       const far = dist(polys[0][0][0], center) > 450;
-      for (const pc of polys) viewer.entities.add({ polygon: {
+      for (const pc of polys) buildings.push(viewer.entities.add({ polygon: {
         hierarchy: new C.PolygonHierarchy(pos(pc[0])), height: 0, extrudedHeight: heightOf(p),
-        material: terminal ? col("#5FA8DC", .95) : col(far ? "#E9E6E0" : "#FBFAF7", far ? .75 : .97),
-        outline: false } });
+        material: terminal ? col("#3E9BE0", .55) : col("#FFFFFF", far ? .18 : .32),
+        outline: false } }));
       if (terminal) viewer.entities.add({ position: C.Cartesian3.fromDegrees(polys[0][0][0][0] + 0.0001, polys[0][0][0][1] - 0.0002, heightOf(p) + 6),
         label: { text: "Stazione marittima", font: "600 12px Inter, sans-serif", fillColor: col("#0B6AA9"), outlineColor: C.Color.WHITE, outlineWidth: 3,
           style: C.LabelStyle.FILL_AND_OUTLINE, disableDepthTestDistance: Number.POSITIVE_INFINITY, distanceDisplayCondition: new C.DistanceDisplayCondition(0, 900) } });
       continue;
     }
     if (/^(pier|quay|breakwater|groyne)$/.test(p.man_made || "")) {
-      if (polys) for (const pc of polys) viewer.entities.add({ polygon: { hierarchy: new C.PolygonHierarchy(pos(pc[0])), height: 0, extrudedHeight: 1.5, material: col("#D9CFBC") } });
-      else if (g.type === "LineString") viewer.entities.add({ corridor: { positions: pos(g.coordinates), width: num(p.width) || 7, height: 0, extrudedHeight: 1.5, material: col("#D9CFBC") } });
+      // le banchine sono già visibili nell'immagine satellitare
       continue;
     }
   }
@@ -141,7 +141,7 @@
   viewer.entities.add({ position: C.Cartesian3.fromDegrees(destPt[0], destPt[1], 14), cylinder: { length: 28, topRadius: 0, bottomRadius: 5, material: col("#F2B33D", .9) } });
   viewer.entities.add({ position: C.Cartesian3.fromDegrees(destPt[0], destPt[1], 0.5), ellipse: { semiMajorAxis: 14, semiMinorAxis: 14, height: 0.5, material: col("#F2B33D", .35) } });
   tag(destPt, "MOLO B · Procida 10:40", "#F2B33D", "#0A1A33", 32);
-  $("#t-ferry")?.addEventListener("change", (e) => ferries.forEach((x) => (x.show = e.target.checked)));
+  $("#t-bld").addEventListener("change", (e) => buildings.forEach((x) => (x.show = e.target.checked)));
 
   // ---------- Camera ----------
   const routeSphere = C.BoundingSphere.fromPoints(pos(route));
@@ -177,5 +177,6 @@
     cancelAnimationFrame(raf); t0 = 0; lastK = -1; head = 200; $("#b-in").hidden = true; $("#b-go").textContent = "Guida in corso…";
     raf = requestAnimationFrame(tick);
   });
+  window.N360route = { route, cum, total, dist, brg };
   $("#b-view").addEventListener("click", () => { cancelAnimationFrame(raf); raf = null; $("#b-go").textContent = "Avvia la guida"; overview(); });
 })();
