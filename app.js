@@ -14,6 +14,7 @@
     animation: false, timeline: false, fullscreenButton: false, infoBox: false, selectionIndicator: false,
     requestRenderMode: false
   });
+  window.__n360 = viewer;
   viewer.scene.skyAtmosphere.show = true;
   viewer.scene.globe.enableLighting = false;
   viewer.scene.highDynamicRange = false;
@@ -123,20 +124,24 @@
   $("#r-title").textContent = `A piedi fino al ${CFG.dest.name}`;
   $("#r-sub").textContent = `${Math.round(total / 10) * 10} m da ${CFG.start.name} · percorso calcolato sui camminamenti reali`;
   $("#r-badge").textContent = `${mins} min`;
-  const renderSteps = (m) => { $("#r-steps").innerHTML = shown.map((s, i) => `<li class="${s.last ? "last " : ""}${m >= s.at && (i === shown.length - 1 || m < shown[i + 1].at) ? "now" : m > s.at ? "done" : ""}"><span>${i + 1}</span>${s.txt}</li>`).join(""); };
+  const renderSteps = (m) => {
+    let cur = shown.findIndex((s, i) => m >= s.at && (i === shown.length - 1 || m < shown[i + 1].at)); if (cur < 0) cur = 0;
+    $("#r-steps").innerHTML = shown.map((s, i) => `<li class="${s.last ? "last " : ""}${i === cur ? "now" : i === cur + 1 ? "next" : i < cur ? "done" : ""}"><span>${i + 1}</span>${s.txt}</li>`).join("");
+  };
   renderSteps(-1);
 
   // ---------- Disegno percorso, partenza, moli ----------
   viewer.entities.add({ polyline: { positions: pos(route), width: 9, clampToGround: true,
     material: new C.PolylineGlowMaterialProperty({ glowPower: 0.22, color: col("#0E7BC4") }) } });
-  const label = (pt, text, bg, fg, h = 18) => viewer.entities.add({
+  const label = (pt, text, bg, fg, h = 18, near = 0) => viewer.entities.add({
     position: C.Cartesian3.fromDegrees(pt[0], pt[1], h),
     point: { pixelSize: 12, color: col(bg), outlineColor: C.Color.WHITE, outlineWidth: 3, disableDepthTestDistance: Number.POSITIVE_INFINITY },
     label: { text, font: "700 14px Inter, sans-serif", fillColor: col(fg), showBackground: true, backgroundColor: col(bg),
-      backgroundPadding: new C.Cartesian2(9, 6), pixelOffset: new C.Cartesian2(0, -24), disableDepthTestDistance: Number.POSITIVE_INFINITY }
+      backgroundPadding: new C.Cartesian2(9, 6), pixelOffset: new C.Cartesian2(0, -24), disableDepthTestDistance: Number.POSITIVE_INFINITY,
+      distanceDisplayCondition: near ? new C.DistanceDisplayCondition(0, near) : undefined }
   });
   label(startPt, CFG.start.name, "#0A1A33", "#FFFFFF");
-  for (const d of CFG.docks) label([d.lon, d.lat], d.name, "#FFFFFF", "#4E5D73", 8);
+  for (const d of CFG.docks) label([d.lon, d.lat], d.name, "#FFFFFF", "#4E5D73", 6, 160);
   label(destPt, CFG.dest.name.toUpperCase() + " · Procida 10:40", "#F2B33D", "#0A1A33", 22);
 
   // ---------- Camminata simulata ----------

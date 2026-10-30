@@ -33,3 +33,11 @@ h1{margin:4px 0 0;font-size:20px;line-height:1.2;letter-spacing:-.01em}
 .foot{margin:0;font-size:11px;color:var(--ink3);line-height:1.4}
 .toast{position:fixed;left:50%;top:calc(132px + env(safe-area-inset-top));transform:translateX(-50%);background:var(--night);color:#fff;border-radius:12px;padding:9px 14px;font-size:13px;font-weight:600;opacity:0;transition:opacity .25s;z-index:9;pointer-events:none;max-width:90vw;text-align:center}
 .toast.on{opacity:1}
+
+@media (max-width:899px){
+  .sheet{max-height:46vh;gap:8px;padding-top:8px}
+  .steps li:not(.now):not(.next){display:none}
+  h1{font-size:18px}.sub{font-size:12.5px}
+  .foot{font-size:10.5px}
+}
+.cesium-credit-logoContainer{display:none!important}
