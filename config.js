@@ -4,7 +4,7 @@ window.N360 = {
   ionToken: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJub25jZSI6ImJGYzVRT3dicHBobEVWU0QiLCJqdGkiOiI4OGQzMmIwNS03NGRjLTQ2MzUtYTlkOS0yNDhlMDAwNmE3MjQiLCJpZCI6NTM4ODkyLCJzdWIiOiJjYXN0ZjIxIiwiaXNzIjoiaHR0cHM6Ly9hcGkuY2VzaXVtLmNvbSIsImF1ZCI6Im5hcG9saTM2MCIsImlhdCI6MTc5MzM3MDQxMX0.fra17rAOC_n7Jjmj5_xoWaEjfBcWjzoj3e7zuaqAKcw",          // token Cesium ion: attiva il 3D fotorealistico (Google Photorealistic 3D Tiles)
   view: { lon: 14.2545, lat: 40.8381, height: 380, heading: 25, pitch: -40 },
   start: { name: "Metro Municipio", lon: 14.2534939, lat: 40.8399383 },          // OSM node/8450070548
-  dest:  { name: "Molo B", sub: "pontile 9 · aliscafo per Procida 10:40", lon: 14.2550166, lat: 40.8377482 }, // OSM node/10072475980
+  dest:  { name: "Molo B", sub: "pontile 9 · aliscafo per Procida 11:45", lon: 14.2550166, lat: 40.8377482 }, // OSM node/10072475980
   docks: [                                                                        // pontili OSM (amenity=ferry_terminal)
     { name: "Pontile 6", lon: 14.2548181, lat: 40.8374525 },
     { name: "Pontile 7", lon: 14.2548849, lat: 40.8375508 },

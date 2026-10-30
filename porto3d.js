@@ -148,7 +148,7 @@
   for (const t of [0.13, 0.17, 0.21, 0.25]) { const s = section(t); if (s) box(add2(s.west, NR, 1.6), [1.0, 3.2, 1.1], "#0A1A33"); }
   { const s = section(0.19); if (s) tagIn(add2(s.west, NR, 2), "Biglietterie aliscafi", "#0A1A33", "#FFFFFF", 3.2); }
   // tabellone partenze
-  const sTab = section(0.29); if (sTab) { box(sTab.mid, [0.3, 4.2, 1.6], "#11161F", 2.2); tagIn(sTab.mid, "PARTENZE · 10:40 Procida → Molo B", "#11161F", "#F2B33D", 4.6, 320); }
+  const sTab = section(0.29); if (sTab) { box(sTab.mid, [0.3, 4.2, 1.6], "#11161F", 2.2); tagIn(sTab.mid, "PARTENZE · 11:45 Procida → Molo B", "#11161F", "#F2B33D", 4.6, 320); }
   // file di sedute
   for (let t = 0.34; t <= 0.66; t += 0.045) { const s = section(t); if (!s) continue; for (const o of [-0.22, 0.02]) box(add2(s.mid, NR, s.w * o), [4.2, 0.7, 0.5], "#3E4A5C"); }
   // bar e servizi
@@ -224,7 +224,7 @@
     { at: 0, dir: "door", txt: "Entra dall'ingresso nord della Stazione marittima" },
     { at: mBig - 14, dir: "sign", txt: "Cartello «Biglietterie» riconosciuto: posizione aggiornata", sign: "Biglietterie" },
     { at: mBig + 4, dir: "up", txt: "Hai già il biglietto: prosegui dritto" },
-    { at: mTab - 8, dir: "sign", txt: "Tabellone riconosciuto: Procida 10:40 · Molo B", sign: "Tabellone partenze" },
+    { at: mTab - 8, dir: "sign", txt: "Tabellone riconosciuto: Procida 11:45 · Molo B", sign: "Tabellone partenze" },
     ...(mGate - mTab > 40 ? [{ at: mTab + 6, dir: "up", txt: "Attraversa la sala d'attesa" }] : []),
     { at: mGate - 16, dir: "left", txt: "Varco del Molo B sulla sinistra: segui il giallo", sign: "Varco Molo B" },
     { at: IN.total - 6, dir: "up", txt: "Esci sul pontile 9" },
@@ -245,7 +245,7 @@
   addOut(tag(startPt, "M  " + CFG.start.name, "#0A1A33", "#FFFFFF", 14));
   addOut(tag(entranceOut, "Ingresso terminal", "#FFFFFF", "#0B6AA9", 10));
   addOut(viewer.entities.add({ position: P3(pierB.ll, 16), cylinder: { length: 28, topRadius: 0, bottomRadius: 5, material: col("#F2B33D", .9) } }));
-  viewer.entities.add({ position: P3(pierB.ll, 34), label: { text: "MOLO B · Procida 10:40", font: "700 13px Inter, sans-serif", fillColor: col("#0A1A33"), showBackground: true, backgroundColor: col("#F2B33D"), backgroundPadding: new C.Cartesian2(9, 6), verticalOrigin: C.VerticalOrigin.BOTTOM, disableDepthTestDistance: Number.POSITIVE_INFINITY } });
+  viewer.entities.add({ position: P3(pierB.ll, 34), label: { text: "MOLO B · Procida 11:45", font: "700 13px Inter, sans-serif", fillColor: col("#0A1A33"), showBackground: true, backgroundColor: col("#F2B33D"), backgroundPadding: new C.Cartesian2(9, 6), verticalOrigin: C.VerticalOrigin.BOTTOM, disableDepthTestDistance: Number.POSITIVE_INFINITY } });
 
   // ---------- Stato e interfaccia ----------
   let mode = "out", RT = OUT, STEPS = outSteps;
