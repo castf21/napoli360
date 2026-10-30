@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>NAPOLI 360 · Port Vision AI · Molo Beverello</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/cesium@1.123.0/Build/Cesium/Widgets/widgets.css">
+<link rel="stylesheet" href="style.css">
+<script src="config.js"></script>
+<script>window.CESIUM_BASE_URL = window.N360.cesium;</script>
+<script src="https://cdn.jsdelivr.net/npm/cesium@1.123.0/Build/Cesium/Cesium.js"></script>
+</head>
+<body>
+<div id="map"></div>
+
+<header class="top">
+  <div class="card trip">
+    <div class="logo">NAPOLI <b>360</b><i>°</i></div>
+    <div class="tripmain">
+      <div class="ovl">Prossimo imbarco</div>
+      <div class="ttl">Procida · 10:40</div>
+    </div>
+    <span class="pill ok">Imbarco aperto</span>
+  </div>
+  <div class="alert">Avviso del gestore: la partenza è passata dal <b>Molo A</b> al <b>Molo B</b></div>
+</header>
+
+<section class="sheet" id="sheet" aria-live="polite">
+  <div class="grab"></div>
+  <div class="row between">
+    <div>
+      <div class="ovl sea">Port Vision AI · percorso a piedi</div>
+      <h1 id="r-title">Calcolo il percorso…</h1>
+      <div class="sub" id="r-sub">Dati reali del Molo Beverello da OpenStreetMap</div>
+    </div>
+    <div class="badge" id="r-badge">—</div>
+  </div>
+  <div class="bar"><div id="r-bar"></div></div>
+  <ol class="steps" id="r-steps"></ol>
+  <div class="row gap">
+    <button class="btn dark" id="b-go">Avvia la guida</button>
+    <button class="btn soft" id="b-view">Vista dall'alto</button>
+  </div>
+  <label class="toggle"><input type="checkbox" id="t-ferry" checked> Mostra le rotte dei traghetti</label>
+  <p class="foot">Prototipo dimostrativo · mappa e percorso calcolati sui dati © OpenStreetMap contributors · nomi dei moli indicativi · motore 3D CesiumJS</p>
+</section>
+
+<div class="toast" id="toast" role="status"></div>
+<script src="app.js"></script>
+</body>
+</html>
