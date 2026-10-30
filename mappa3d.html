@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>NAPOLI 360 · Mappa 3D di Napoli</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/cesium@1.123.0/Build/Cesium/Widgets/widgets.css">
+<link rel="stylesheet" href="porto3d.css">
+<style>
+.chips{position:absolute;left:0;right:0;top:calc(112px + env(safe-area-inset-top));z-index:5;display:flex;gap:8px;overflow-x:auto;padding:0 12px;scrollbar-width:none}
+@media (min-width:521px){.chips{top:150px}}
+.chips::-webkit-scrollbar{display:none}
+.chip{flex-shrink:0;border:0;border-radius:999px;padding:8px 13px;font:700 12.5px Inter,sans-serif;background:rgba(255,255,255,.95);color:var(--night);box-shadow:var(--sh);cursor:pointer;display:flex;align-items:center;gap:6px}
+.chip i{width:9px;height:9px;border-radius:5px;display:block}
+.chip[aria-pressed="true"]{background:var(--night);color:#fff}
+.pcard .cat{font-size:10.5px;font-weight:800;letter-spacing:.08em;text-transform:uppercase}
+.plist{display:flex;gap:8px;overflow-x:auto;scrollbar-width:none;padding-bottom:2px}.plist::-webkit-scrollbar{display:none}
+.pbtn{flex-shrink:0;border:1px solid var(--line);background:#fff;border-radius:12px;padding:8px 11px;font:600 12.5px Inter,sans-serif;cursor:pointer;color:var(--night)}
+.pbtn[aria-current="true"]{border-color:var(--night);background:var(--night);color:#fff}
+</style>
+<script src="config.js"></script>
+<script>window.CESIUM_BASE_URL = window.N360.cesium;</script>
+<script src="https://cdn.jsdelivr.net/npm/cesium@1.123.0/Build/Cesium/Cesium.js"></script>
+</head>
+<body>
+<div class="stage">
+  <aside class="side">
+    <span class="tag">Mappa 3D · dati reali</span>
+    <h2>Napoli in 3D</h2>
+    <p>Porto, cultura, eventi e mobilità sulla città vera. Le posizioni dei luoghi vengono da OpenStreetMap.</p>
+    <p class="small">Tocca un luogo o una categoria; trascina per ruotare, usa due dita o la rotella per lo zoom.</p>
+  </aside>
+  <div class="device">
+    <div class="screen" id="screen">
+      <div id="map"></div>
+      <header class="top">
+        <div class="bar">
+          <a class="back" href="index.html" aria-label="Torna alla home"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg></a>
+          <div class="ttl"><b>Mappa 3D</b><span>Napoli · luoghi reali da OpenStreetMap</span></div>
+        </div>
+      </header>
+      <nav class="chips" id="chips" aria-label="Categorie"></nav>
+      <section class="sheet pcard" id="sheet" aria-live="polite">
+        <div class="grab"></div>
+        <div class="head">
+          <div class="txt"><div class="cat" id="p-cat">Napoli</div><div class="now" id="p-name">Scegli un luogo</div><div class="sub" id="p-desc">Tocca un'etichetta sulla mappa o un luogo qui sotto.</div></div>
+        </div>
+        <div class="plist" id="plist"></div>
+        <div class="btns"><a class="btn sun" id="p-go" href="porto3d.html" hidden>Guidami al molo</a><button class="btn soft" id="p-all">Vista d'insieme</button></div>
+        <p class="foot">Prototipo · posizioni © OpenStreetMap contributors · 3D CesiumJS</p>
+      </section>
+      <div class="toast" id="toast" role="status"></div>
+    </div>
+  </div>
+</div>
+<script src="mappa3d.js"></script>
+</body>
+</html>

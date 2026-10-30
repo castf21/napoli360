@@ -152,6 +152,19 @@ h2.hello{margin:0;font-size:28px;line-height:1.15;font-weight:700;letter-spacing
 @keyframes fillseg{from{transform:scaleX(0)}to{transform:scaleX(1)}}
 .det{opacity:0;animation:detin .45s .8s forwards}@keyframes detin{to{opacity:1}}
 .mmdot{transition:transform 1.2s ease-in-out}
+.wxline{border:0;background:transparent;padding:0;margin-top:6px;display:flex;align-items:center;gap:6px;font:500 12.5px var(--f);color:var(--ink2);text-align:left;flex-wrap:wrap}
+.wxline b{color:var(--night)}
+.wxchip{display:inline-flex;align-items:center;gap:4px;background:var(--sea-soft);color:var(--sea-ink);border-radius:999px;padding:3px 8px;font-weight:700;font-size:11.5px}
+.big-t{font-size:56px;font-weight:800;letter-spacing:-.04em;line-height:1}
+.kv{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.kv .card{padding:12px 14px;display:flex;flex-direction:column;gap:4px}
+.kv .k{font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--ink3)}
+.kv .v{font-size:18px;font-weight:800}
+.lnk{display:flex;gap:12px;align-items:center;text-decoration:none;color:inherit}
+.tag{font-size:10.5px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;border-radius:6px;padding:3px 6px}
+.tag.real{background:var(--ok-soft);color:var(--ok)}.tag.ann{background:var(--sea-soft);color:var(--sea-ink)}.tag.ex{background:var(--surface2);color:var(--ink3)}
+.bot p{margin:0 0 6px}.bot ul{margin:0 0 6px;padding-left:18px}.bot li{margin:2px 0}
+.mth{font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--ink3);margin:8px 2px 0}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
 </head>
@@ -181,7 +194,7 @@ h2.hello{margin:0;font-size:28px;line-height:1.15;font-weight:700;letter-spacing
           <div class="between"><div class="logo">NAPOLI <b>360</b><i>°</i></div><button class="avatar" data-go="profilo" aria-label="Profilo">G</button></div>
           <div>
             <h2 class="hello">Uè, Giulia</h2>
-            <div class="cap row" style="gap:5px;margin-top:6px"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--sea)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 10c0 5-5.5 10.2-7.4 11.8a1 1 0 0 1-1.2 0C9.5 20.2 4 15 4 10a8 8 0 0 1 16 0"/><circle cx="12" cy="10" r="3"/></svg>Vomero · 22° · Lunedì 3 maggio</div>
+            <button class="wxline" data-go="meteo" aria-label="Apri meteo, vento e mare"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--sea)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 10c0 5-5.5 10.2-7.4 11.8a1 1 0 0 1-1.2 0C9.5 20.2 4 15 4 10a8 8 0 0 1 16 0"/><circle cx="12" cy="10" r="3"/></svg>Napoli · <b id="wx-t">meteo</b> · <span id="wx-d"></span><span class="wxchip" id="wx-chip">Vento e mare ›</span></button>
           </div>
           <button class="ask" data-open="partenope"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#C98A12" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9.9 15.5A2 2 0 0 0 8.5 14l-6.1-1.6a.5.5 0 0 1 0-1L8.5 9.9A2 2 0 0 0 9.9 8.5l1.6-6.1a.5.5 0 0 1 1 0L14 8.5a2 2 0 0 0 1.5 1.4l6.1 1.6a.5.5 0 0 1 0 1L15.5 14a2 2 0 0 0-1.4 1.5l-1.6 6.1a.5.5 0 0 1-1 0z"/></svg><span>Chiedi a Partenope…</span><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--ink2)" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" x2="12" y1="19" y2="22"/></svg></button>
           <div class="hero">
@@ -285,7 +298,7 @@ h2.hello{margin:0;font-size:28px;line-height:1.15;font-weight:700;letter-spacing
       <section class="view" id="v-chat" aria-label="Partenope" hidden style="padding-bottom:100px">
         <div class="topbar"><button class="back" data-back aria-label="Indietro"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg></button>
           <span class="ico" style="width:38px;height:38px;border-radius:19px;background:var(--night);color:var(--sun)"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M2 6c.6.5 1.2 1 2.5 1C7 7 7 5 9.5 5c2.6 0 2.4 2 5 2 2.5 0 2.5-2 5-2 1.3 0 1.9.5 2.5 1"/><path d="M2 12c.6.5 1.2 1 2.5 1 2.5 0 2.5-2 5-2 2.6 0 2.4 2 5 2 2.5 0 2.5-2 5-2 1.3 0 1.9.5 2.5 1"/><path d="M2 18c.6.5 1.2 1 2.5 1 2.5 0 2.5-2 5-2 2.6 0 2.4 2 5 2 2.5 0 2.5-2 5-2 1.3 0 1.9.5 2.5 1"/></svg></span>
-          <div><h3>Partenope</h3><div class="cap">Assistente AI · risponde citando le fonti</div></div></div>
+          <div><h3>Partenope</h3><div class="cap" id="chat-sub">Assistente AI · risposte guidate</div></div></div>
         <div class="chat" id="chatlog" aria-live="polite"></div>
         <form class="chatbar" id="chatform"><label for="chatinput" class="sr" style="position:absolute;left:-9999px">Scrivi una domanda</label><input id="chatinput" placeholder="Scrivi una domanda…" autocomplete="off"><button class="send" aria-label="Invia"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></svg></button></form>
       </section>
@@ -303,8 +316,8 @@ h2.hello{margin:0;font-size:28px;line-height:1.15;font-weight:700;letter-spacing
 
       <!-- EVENTI -->
       <section class="view" id="v-eventi" aria-label="Eventi" hidden>
-        <div class="topbar"><button class="back" data-back aria-label="Indietro"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg></button><div><h3>Eventi</h3><div class="cap">Nei prossimi giorni a Napoli</div></div></div>
-        <div class="pad" style="padding-top:16px"><div class="list" id="events"></div><div class="demo">Date tratte dai calendari pubblicati; nel prototipo non si acquistano biglietti.</div></div>
+        <div class="topbar"><button class="back" data-back aria-label="Indietro"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg></button><div><h3>Eventi</h3><div class="cap">Da oggi alla fine dell'America's Cup</div></div></div>
+        <div class="pad" style="padding-top:12px"><div class="list" id="events"></div><div class="demo">Date tratte dai calendari pubblicati (ottobre 2026): verifica sempre sui canali ufficiali di vendita.</div></div>
       </section>
 
       <!-- EVENTO DETTAGLIO -->
@@ -312,29 +325,37 @@ h2.hello{margin:0;font-size:28px;line-height:1.15;font-weight:700;letter-spacing
         <div class="topbar"><button class="back" data-back aria-label="Indietro"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg></button><div><h3>Evento</h3></div></div>
         <div style="height:170px;background:linear-gradient(180deg,#1B1240,#0A1A33);position:relative;overflow:hidden" aria-hidden="true"><div style="position:absolute;left:40px;top:0;border-left:40px solid transparent;border-right:40px solid transparent;border-top:150px solid rgba(242,179,61,.45)"></div><div style="position:absolute;right:50px;top:0;border-left:40px solid transparent;border-right:40px solid transparent;border-top:150px solid rgba(242,107,91,.4)"></div><div style="position:absolute;left:0;right:0;bottom:0;height:34px;background:#05070D"></div></div>
         <div class="pad" style="padding-top:16px">
-          <div class="ovl" style="color:var(--sea-ink)">Martedì 4 maggio 2027 · 21:00</div>
-          <h2 class="hello" style="font-size:24px">Elodie in concerto</h2>
-          <div class="cap">Palapartenope · Via Barbagallo, Fuorigrotta</div>
+          <div class="ovl" style="color:var(--sea-ink)" id="ev-date"></div>
+          <h2 class="hello" style="font-size:24px" id="ev-title"></h2>
+          <div class="cap" id="ev-venue"></div>
           <div class="card" style="padding:14px;display:flex;flex-direction:column;gap:10px">
-            <div class="ovl" style="color:var(--ink2)">Come arrivarci dal Vomero</div>
-            <div class="step"><span class="n" style="background:var(--sea)">1</span><div><div class="t">Funicolare di Montesanto</div><div class="d">fino a Montesanto · 6 min</div></div></div>
-            <div class="step"><span class="n" style="background:var(--sea)">2</span><div><div class="t">Cumana fino a Edenlandia</div><div class="d">circa 15 min · poi 3 min a piedi</div></div></div>
-            <div class="cap">Percorso indicativo: verifica gli orari sul sito del gestore.</div>
+            <div class="ovl" style="color:var(--ink2)">Come arrivarci</div>
+            <div id="ev-route" class="list" style="gap:8px"></div>
+            <div class="cap">Percorso indicativo: verifica orari e corse sui siti dei gestori.</div>
           </div>
+          <div class="src" id="ev-src"></div>
           <div class="row" style="gap:8px"><button class="btn dark" id="saveEv">Salva in La mia Napoli</button></div>
         </div>
       </section>
 
       <!-- CULTURA -->
       <section class="view" id="v-cultura" aria-label="Cultura" hidden>
-        <div class="topbar"><button class="back" data-back aria-label="Indietro"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg></button><div><h3>Cultura</h3><div class="cap">Musei e luoghi da visitare</div></div></div>
-        <div class="pad" style="padding-top:16px"><div class="list" id="places"></div><div class="demo">Orari e biglietti si consultano sui siti ufficiali dei musei.</div></div>
+        <div class="topbar"><button class="back" data-back aria-label="Indietro"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg></button><div><h3>Cultura</h3><div class="cap">Musei, monumenti e tradizioni</div></div></div>
+        <div class="pad" style="padding-top:12px">
+          <div class="card" style="padding:14px;background:var(--night);color:#fff;display:flex;flex-direction:column;gap:4px"><span class="ovl" style="color:var(--sun)">Domenica al museo</span><b style="font-size:15px">Domenica 1 novembre 2026: ingresso gratuito nei musei statali</b><span style="font-size:12.5px;color:#B9C4D4">Tra cui MANN, Palazzo Reale e Capodimonte · fonte: Ministero della Cultura</span></div>
+          <div class="list" id="places"></div>
+          <div class="demo">Orari, prenotazioni e biglietti: consulta sempre i siti ufficiali dei musei.</div></div>
       </section>
 
       <!-- INFORMA -->
       <section class="view" id="v-informa" aria-label="Napoli Informa" hidden>
         <div class="topbar"><button class="back" data-back aria-label="Indietro"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg></button><div><h3>Napoli Informa</h3><div class="cap">Avvisi su viabilità, porto e trasporti</div></div></div>
-        <div class="pad" style="padding-top:16px"><div class="list" id="alerts"></div><div class="demo">Avvisi di esempio.</div></div>
+        <div class="pad" style="padding-top:12px">
+          <div class="row" style="gap:6px;flex-wrap:wrap"><span class="tag real">Reale</span><span class="tag ann">Annunciato</span><span class="cap">notizie pubblicate</span><span class="tag ex" style="margin-left:6px">Esempio</span><span class="cap">simulato per la demo</span></div>
+          <div class="list" id="alerts"></div>
+          <div class="mth">Fonti ufficiali che l'app integrerebbe</div>
+          <div class="list" id="offsrc"></div>
+        </div>
       </section>
 
       <!-- SALVATI -->
@@ -357,10 +378,28 @@ h2.hello{margin:0;font-size:28px;line-height:1.15;font-weight:700;letter-spacing
         </div>
       </section>
 
+      <!-- METEO -->
+      <section class="view" id="v-meteo" aria-label="Meteo, vento e mare" hidden>
+        <div class="topbar"><button class="back" data-back aria-label="Indietro"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg></button><div><h3>Meteo, vento e mare</h3><div class="cap">Napoli · golfo e porto</div></div></div>
+        <div class="pad" style="padding-top:14px">
+          <div class="card" style="padding:16px;display:flex;align-items:center;gap:14px"><div class="big-t num" id="m-t">--°</div><div><div style="font-size:17px;font-weight:700" id="m-cond">Caricamento…</div><div class="cap" id="m-feel"></div></div></div>
+          <div class="kv">
+            <div class="card"><span class="k">Vento</span><span class="v" id="m-wind">—</span><span class="cap" id="m-wind2"></span></div>
+            <div class="card"><span class="k">Mare</span><span class="v" id="m-sea">—</span><span class="cap" id="m-sea2"></span></div>
+          </div>
+          <div class="alert light" id="m-warn" hidden></div>
+          <div class="card" style="padding:4px 14px" id="m-days"></div>
+          <div class="cap" id="m-src">Dati in tempo reale: Open-Meteo (modelli meteorologici nazionali, CC BY 4.0).</div>
+          <div class="mth">Fonti ufficiali</div>
+          <a class="item lnk" href="https://www.meteoam.it" target="_blank" rel="noopener"><span class="ico" style="background:var(--sea-soft);color:var(--sea)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M17.5 19H9a7 7 0 1 1 6.7-9h1.8a4.5 4.5 0 1 1 0 9Z"/></svg></span><div style="min-width:0"><div class="t">Aeronautica Militare · meteoam.it</div><div class="d">Servizio meteorologico nazionale: previsioni e bollettino del mare</div></div></a>
+          <a class="item lnk" href="https://centrofunzionale.regione.campania.it" target="_blank" rel="noopener"><span class="ico" style="background:var(--coral-soft);color:var(--coral)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="m21.7 18-8-14a2 2 0 0 0-3.5 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.7-3"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg></span><div style="min-width:0"><div class="t">Protezione Civile Regione Campania</div><div class="d">Centro Funzionale: avvisi e allerte meteo ufficiali</div></div></a>
+        </div>
+      </section>
+
       <!-- TABBAR -->
       <nav class="tabbar" id="tabbar" aria-label="Navigazione principale">
         <button class="tab" data-tab="home" aria-current="page"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8"/><path d="M3 10a2 2 0 0 1 .7-1.5l7-6a2 2 0 0 1 2.6 0l7 6A2 2 0 0 1 21 10v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>Home</button>
-        <button class="tab" data-href="porto3d.html"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M14.1 5.6a2 2 0 0 0 1.8 0l3.7-1.9A1 1 0 0 1 21 4.6v12.8a1 1 0 0 1-.6.9l-4.5 2.3a2 2 0 0 1-1.8 0l-4.2-2.1a2 2 0 0 0-1.8 0l-3.7 1.8A1 1 0 0 1 3 19.4V6.6a1 1 0 0 1 .6-.9l4.5-2.3a2 2 0 0 1 1.8 0z"/><path d="M15 5.8v15"/><path d="M9 3.2v15"/></svg>Mappa</button>
+        <button class="tab" data-href="mappa3d.html"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M14.1 5.6a2 2 0 0 0 1.8 0l3.7-1.9A1 1 0 0 1 21 4.6v12.8a1 1 0 0 1-.6.9l-4.5 2.3a2 2 0 0 1-1.8 0l-4.2-2.1a2 2 0 0 0-1.8 0l-3.7 1.8A1 1 0 0 1 3 19.4V6.6a1 1 0 0 1 .6-.9l4.5-2.3a2 2 0 0 1 1.8 0z"/><path d="M15 5.8v15"/><path d="M9 3.2v15"/></svg>Mappa</button>
         <button class="tab center" data-open="partenope"><span class="fab"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M2 6c.6.5 1.2 1 2.5 1C7 7 7 5 9.5 5c2.6 0 2.4 2 5 2 2.5 0 2.5-2 5-2 1.3 0 1.9.5 2.5 1"/><path d="M2 12c.6.5 1.2 1 2.5 1 2.5 0 2.5-2 5-2 2.6 0 2.4 2 5 2 2.5 0 2.5-2 5-2 1.3 0 1.9.5 2.5 1"/><path d="M2 18c.6.5 1.2 1 2.5 1 2.5 0 2.5-2 5-2 2.6 0 2.4 2 5 2 2.5 0 2.5-2 5-2 1.3 0 1.9.5 2.5 1"/></svg></span>Partenope</button>
         <button class="tab" data-tab="salvati"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="m19 21-7-4-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16z"/></svg>Salvati</button>
         <button class="tab" data-tab="profilo"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>Profilo</button>
@@ -464,7 +503,7 @@ h2.hello{margin:0;font-size:28px;line-height:1.15;font-weight:700;letter-spacing
     musei: `<div>Vicino a te puoi visitare il Museo Archeologico Nazionale, Castel dell'Ovo e il Museo di Capodimonte.</div>
       <div class="alert light">Non posso verificare gli orari di oggi: controlla sul sito ufficiale del museo.</div>
       <button class="btn dark" data-go="cultura">Apri Cultura</button>`,
-    fallback: `<div>Nel prototipo rispondo solo ad alcune domande. Prova con una di queste:</div>
+    fallback: `<div>In questa versione pubblica rispondo alle domande guidate: la chat libera con l'AI funziona nella versione di NAPOLI 360 aperta su Claude. Prova con una di queste:</div>
       <div class="chips"><button data-ask="procida">Procida dal Vomero</button><button data-ask="imbarco">Il mio imbarco</button><button data-ask="weekend">Weekend</button><button data-ask="musei">Musei</button></div>`
   };
   function match(text){
@@ -485,8 +524,51 @@ h2.hello{margin:0;font-size:28px;line-height:1.15;font-weight:700;letter-spacing
     scrollChat();
     setTimeout(() => { ty.remove(); const b = document.createElement("div"); b.className = "bot"; b.innerHTML = A[key] || A.fallback; log.appendChild(b); scrollChat(); }, 900);
   }
-  function askText(text){ const k = match(text); const lbl = text; if (k === "fallback"){ go("chat"); const log=$("#chatlog"); const me=document.createElement("div"); me.className="me"; me.textContent=lbl; log.appendChild(me); setTimeout(()=>{const b=document.createElement("div"); b.className="bot"; b.innerHTML=A.fallback; log.appendChild(b); scrollChat();},700); scrollChat(); } else { ask(k, lbl); } }
+  function askText(text){ if (AI) { askAI(text); return; } const k = match(text); const lbl = text; if (k === "fallback"){ go("chat"); const log=$("#chatlog"); const me=document.createElement("div"); me.className="me"; me.textContent=lbl; log.appendChild(me); setTimeout(()=>{const b=document.createElement("div"); b.className="bot"; b.innerHTML=A.fallback; log.appendChild(b); scrollChat();},700); scrollChat(); } else { ask(k, lbl); } }
   function scrollChat(){ const v = $("#v-chat"); requestAnimationFrame(() => v.scrollTop = v.scrollHeight); }
+
+  // ---- Partenope con AI vera ----
+  let AI = null; const turns = [];
+  (async () => { try { if (window.claude && window.claude.use) AI = await window.claude.use("sample"); } catch (e) { AI = null; }
+    if (AI) { $("#chat-sub").textContent = "Assistente AI · chiedi quello che vuoi"; $("#sheetinput").placeholder = "Chiedi a Partenope quello che vuoi…"; } })();
+  const esc = (t) => t.replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+  function md(t) {
+    const lines = esc(t).replace(/\*\*(.+?)\*\*/g, "<b>$1</b>").split(/\n/); let out = "", inList = false;
+    for (const l of lines) { const m = l.match(/^\s*(?:[-*•]|\d+[.)])\s+(.*)/);
+      if (m) { if (!inList) { out += "<ul>"; inList = true; } out += "<li>" + m[1] + "</li>"; }
+      else { if (inList) { out += "</ul>"; inList = false; } if (l.trim()) out += "<p>" + l + "</p>"; } }
+    return out + (inList ? "</ul>" : "");
+  }
+  function rules() {
+    const ev = (typeof EVENTS !== "undefined" ? EVENTS : []).map(e => `- ${e[1]} ${e[0].slice(0,4)}: ${e[2]} (${e[3]}) · ${V[e[4]].n}`).join("\n");
+    const pl = (typeof PLACES !== "undefined" ? PLACES : []).map(p => `- ${p[0]}: ${p[1]} (${p[2]})`).join("\n");
+    return `Sei Partenope, l'assistente AI dell'app NAPOLI 360: aiuti residenti e turisti a muoversi e vivere Napoli (porto, mobilità, eventi, cultura, avvisi).
+Oggi è ${new Date().toLocaleDateString("it-IT", { weekday: "long", day: "numeric", month: "long", year: "numeric" })}.
+Scenario dimostrativo dell'utente: Giulia, al Vomero. Ha un aliscafo per Procida alle 10:40 dal Molo Beverello, imbarco dalle 10:15, posto 14B; il gestore ha spostato la partenza dal Molo A al Molo B (pontile 9) alle 9:58. Nell'app il pulsante "Guidami al molo" mostra la mappa 3D del Beverello con il percorso dalla metro Municipio (circa 310 m) e dentro il terminal fino al varco del Molo B.
+Eventi in calendario (fonti pubblicate a ottobre 2026):
+${ev}
+Luoghi culturali:
+${pl}
+Avvisi: America's Cup a Napoli dal 22 maggio al 19 luglio 2027, Race Village su Via Caracciolo (chiusa al traffico in quel periodo, piano definitivo da approvare).
+Regole: rispondi in italiano chiaro, cordiale, con al massimo un tocco di napoletano; massimo 120 parole; usa un elenco puntato per percorsi e liste. Non inventare orari, prezzi, numeri di corsa o disponibilità: se non puoi verificarli dillo e indica la fonte ufficiale (ANM, EAV, Trenitalia, compagnie di navigazione, siti dei musei, Comune di Napoli, meteoam.it). Non hai accesso a internet né a dati in tempo reale. Se la domanda esce dal tema di Napoli rispondi brevemente e riporta a come puoi aiutare in città.`;
+  }
+  async function askAI(text) {
+    if (stack[stack.length-1] !== "chat") go("chat");
+    const log = $("#chatlog");
+    const me = document.createElement("div"); me.className = "me"; me.textContent = text; log.appendChild(me);
+    const b = document.createElement("div"); b.className = "bot"; b.innerHTML = '<div class="typing" style="box-shadow:none;padding:4px 0"><i></i><i></i><i></i></div>'; log.appendChild(b); scrollChat();
+    turns.push({ role: "user", content: text });
+    try {
+      const { text: ans } = await AI([{ role: "user", content: rules() }, ...turns.slice(-12)], { cache: false, effort: "low", onText: ({ text: t }) => { b.innerHTML = md(t); scrollChat(); } });
+      b.innerHTML = md(ans); turns.push({ role: "assistant", content: ans });
+    } catch (e) {
+      if (["not_granted","sampling_disabled","not_declared","capability_disabled","capability_removed"].includes(e.code)) { AI = null; turns.length = 0; b.innerHTML = A.fallback; }
+      else if (e.code === "rate_limited") b.innerHTML = (e.text ? md(e.text) : "") + "<p>Troppe richieste in poco tempo: riprova tra qualche minuto.</p>";
+      else if (e.code === "refused") b.innerHTML = "<p>Su questo non posso aiutarti. Chiedimi di porto, trasporti, eventi o cultura a Napoli.</p>";
+      else b.innerHTML = (e.text ? md(e.text) : "") + "<p>Non riesco a rispondere in questo momento: riprova.</p>";
+    }
+    scrollChat();
+  }
   $("#chatform").addEventListener("submit", e => { e.preventDefault(); const v = $("#chatinput").value.trim(); if (!v) return; $("#chatinput").value = ""; askText(v); });
   $("#sheetform").addEventListener("submit", e => { e.preventDefault(); const v = $("#sheetinput").value.trim(); if (!v) return; $("#sheetinput").value = ""; closeSheet(); askText(v); });
 
@@ -619,13 +701,115 @@ h2.hello{margin:0;font-size:28px;line-height:1.15;font-weight:700;letter-spacing
   // ---- liste ----
   const lines = [["Linea 1 · Metro","Piscinola ↔ Centro Direzionale","Regolare","ok","var(--sea)"],["Funicolare Centrale","Fuga ↔ Augusteo","Regolare","ok","var(--sea)"],["Linea 2 · Trenitalia","Pozzuoli ↔ Gianturco","Ritardi 10 min","warn","#5B6B80"],["Cumana · EAV","Montesanto ↔ Torregaveta","Regolare","ok","#2F7D5B"]];
   $("#lines").innerHTML = lines.map(([t,d,s,c,col]) => `<div class="item"><span class="ico" style="background:${col};color:#fff;font-weight:800;font-size:13px">${t[0] === "L" ? t.split(" ")[1] : t[0]}</span><div style="min-width:0"><div class="t">${t}</div><div class="d">${d}</div></div><span class="status ${c}">${s}</span></div>`).join("");
-  const events = [["Mar 4 maggio · 21:00","Elodie","Palapartenope · Fuorigrotta",true],["22 maggio – 19 luglio","America's Cup","Regate nel golfo di Napoli",false]];
-  $("#events").innerHTML = events.map(([d,t,p,link]) => `<button class="item" ${link ? 'data-go="evento"' : 'data-toast="1"'}><span class="thumb" aria-hidden="true"></span><div style="min-width:0"><div class="ovl" style="color:var(--sea-ink)">${d}</div><div class="t" style="margin-top:3px">${t}</div><div class="d">${p}</div></div></button>`).join("");
-  $$("#events [data-toast]").forEach(b => b.addEventListener("click", () => toast("Nel prototipo è disponibile solo il dettaglio del concerto di Elodie")));
-  const places = [["Museo Archeologico Nazionale","Reperti di Pompei ed Ercolano · Linea 1, Museo"],["Castel dell'Ovo","Sul Lungomare, isolotto di Megaride"],["Museo e Real Bosco di Capodimonte","Collezioni d'arte e parco"],["Cappella Sansevero","Centro storico · il Cristo velato"]];
-  $("#places").innerHTML = places.map(([t,d]) => `<div class="item"><span class="ico" style="background:#EFE6D4;color:#7A5C25"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><line x1="3" x2="21" y1="22" y2="22"/><line x1="6" x2="6" y1="18" y2="11"/><line x1="10" x2="10" y1="18" y2="11"/><line x1="14" x2="14" y1="18" y2="11"/><line x1="18" x2="18" y1="18" y2="11"/><polygon points="12 2 20 7 4 7"/></svg></span><div style="min-width:0"><div class="t">${t}</div><div class="d">${d}</div></div></div>`).join("");
-  const alerts = [["Porto","Molo Beverello: partenza per Procida spostata al Molo B","9:58","bad"],["Viabilità","Lungomare: viabilità modificata fino alle 20:00","8:30","warn"],["Trasporti","Linea 2: ritardi fino a 10 minuti","8:10","warn"]];
-  $("#alerts").innerHTML = alerts.map(([c,t,h,s]) => `<div class="item" style="align-items:flex-start"><div style="min-width:0;flex:1"><div class="row" style="gap:8px"><span class="status ${s}" style="margin-left:0">${c}</span><span class="cap num">${h}</span></div><div class="t" style="margin-top:6px">${t}</div></div></div>`).join("");
+  // ---- Eventi reali (fonti: agendaonline.it, teatrosancarlo/gbopera, napolike.it, milanofinanza.it · verificati a ottobre 2026) ----
+  const V = {
+    pala: { n: "Palapartenope · Fuorigrotta", r: [["Linea 1 o funicolare fino a Montesanto", "dal centro"], ["Cumana fino a Edenlandia", "circa 15 min · poi pochi minuti a piedi"]] },
+    casa: { n: "Casa della Musica · Fuorigrotta (accanto al Palapartenope)", r: [["Linea 1 o funicolare fino a Montesanto", "dal centro"], ["Cumana fino a Edenlandia", "circa 15 min · poi pochi minuti a piedi"]] },
+    mara: { n: "Stadio Diego Armando Maradona · Fuorigrotta", r: [["Linea 2 fino a Campi Flegrei", "oppure Cumana fino a Mostra"], ["A piedi allo stadio", "circa 5-10 min"]] },
+    sanc: { n: "Teatro di San Carlo · Via San Carlo", r: [["Linea 1 fino a Municipio", "uscita verso piazza Municipio"], ["A piedi verso il teatro", "circa 5 min, accanto a Palazzo Reale"]] },
+    ac:   { n: "Golfo di Napoli · Race Village su Via Caracciolo", r: [["Linea 2 fino a Mergellina", "oppure a piedi dal centro lungo il mare"], ["Race Village alla Rotonda Diaz", "Via Caracciolo chiusa al traffico durante l'evento"]] },
+    are:  { n: "Arena Flegrea · Mostra d'Oltremare", r: [["Cumana fino a Mostra", "oppure Linea 2 fino a Campi Flegrei"], ["A piedi all'Arena", "pochi minuti"]] }
+  };
+  const EVENTS = [
+    ["2026-11-01","Dom 1 – Mar 3 novembre","Notre Dame de Paris","Musical","pala","agendaonline.it"],
+    ["2026-11-14","Sab 14 novembre","Marco Masini","Concerto","pala","agendaonline.it"],
+    ["2026-11-24","Mar 24 – Mer 25 novembre","Shiva","Concerto","pala","agendaonline.it"],
+    ["2026-12-01","Mar 1 dicembre","Madame · Disincanto Tour","Concerto","pala","agendaonline.it"],
+    ["2026-12-02","Mer 2 dicembre","Luisa Miller · inaugurazione della stagione","Opera di Verdi","sanc","Teatro di San Carlo"],
+    ["2026-12-05","Sab 5 dicembre","ANNA · Million Dollar Babe Tour","Concerto","pala","agendaonline.it"],
+    ["2026-12-23","Mer 23 dicembre","Irama · A chi ci sarà sempre","Concerto","pala","agendaonline.it"],
+    ["2027-02-01","Febbraio 2027","Aida · nuova produzione","Opera di Verdi","sanc","Teatro di San Carlo"],
+    ["2027-02-11","Gio 11 febbraio","Afterhours · Quello che non c'è Tour","Concerto","casa","agendaonline.it"],
+    ["2027-02-24","Mer 24 – Dom 28 febbraio","Maradona El Diego · il musical","Musical","pala","agendaonline.it"],
+    ["2027-05-04","Mar 4 maggio · 21:00","Elodie","Concerto","pala","agendaonline.it"],
+    ["2027-05-22","Sab 22 maggio – Lun 19 luglio","America's Cup a Napoli","Vela · 38ª America's Cup","ac","americascup / milanofinanza.it"],
+    ["2027-05-22","Sab 22 – Dom 23 maggio","Louis Vuitton Cup · regate di flotta","Vela · avvio delle regate","ac","milanofinanza.it"],
+    ["2027-06-09","Mer 9 – Mar 15 giugno","Geolier · Napoli è casa tua (6 date)","Concerto","mara","allmusicitalia.it"],
+    ["2027-06-16","Mer 16 – Dom 20 giugno","Louis Vuitton Cup · semifinali","Vela","ac","milanofinanza.it"],
+    ["2027-06-19","Sab 19 giugno · 21:00","Achille Lauro · Stadi 2027","Concerto","mara","agendaonline.it"],
+    ["2027-06-21","Lun 21 giugno · 21:00","Nino D'Angelo · Nino 7.0","Concerto","mara","agendaonline.it"],
+    ["2027-06-24","Gio 24 – Ven 25 giugno","Ultimo · La favola continua","Concerto","mara","napolike.it"],
+    ["2027-06-26","Da sab 26 giugno","Louis Vuitton Cup · finale","Vela","ac","milanofinanza.it"],
+    ["2027-06-27","Dom 27 giugno · 21:00","Pinguini Tattici Nucleari","Concerto","mara","agendaonline.it"],
+    ["2027-07-01","Luglio 2027","Tosca all'Arena Flegrea","Opera · Teatro di San Carlo","are","Teatro di San Carlo"],
+    ["2027-07-10","Sab 10 – Lun 19 luglio","America's Cup Match","Vela · la sfida finale","ac","milanofinanza.it"]
+  ].sort((a, b) => a[0].localeCompare(b[0]));
+  const MESI = ["gennaio","febbraio","marzo","aprile","maggio","giugno","luglio","agosto","settembre","ottobre","novembre","dicembre"];
+  let lastM = "";
+  $("#events").innerHTML = EVENTS.map(([iso, d, t, k, v], idx) => {
+    const m = MESI[+iso.slice(5, 7) - 1] + " " + iso.slice(0, 4); const head = m !== lastM ? `<div class="mth">${m}</div>` : ""; lastM = m;
+    const ac = v === "ac";
+    return head + `<button class="item" data-ev="${idx}"><span class="thumb" aria-hidden="true" style="${ac ? "background:linear-gradient(180deg,#5FA8DC,#0A1A33)" : ""}"></span><div style="min-width:0"><div class="ovl" style="color:var(--sea-ink)">${d}</div><div class="t" style="margin-top:3px">${t}</div><div class="d">${k} · ${V[v].n.split(" · ")[0]}</div></div></button>`;
+  }).join("");
+  let curEv = null;
+  document.addEventListener("click", e => {
+    const b = e.target.closest("[data-ev]"); if (!b) return;
+    const [iso, d, t, k, v, src] = EVENTS[+b.dataset.ev]; curEv = t;
+    $("#ev-date").textContent = d + " " + iso.slice(0, 4); $("#ev-title").textContent = t; $("#ev-venue").textContent = k + " · " + V[v].n;
+    $("#ev-route").innerHTML = V[v].r.map(([a, b2], i) => `<div class="step"><span class="n" style="background:var(--sea)">${i + 1}</span><div><div class="t">${a}</div><div class="d">${b2}</div></div></div>`).join("");
+    $("#ev-src").innerHTML = `<span>Fonte: ${src}</span>`;
+    $("#saveEv").textContent = saved.has(t) ? "Salvato in La mia Napoli" : "Salva in La mia Napoli";
+    go("evento");
+  });
+  $("#saveEv").addEventListener("click", () => { if (!curEv) return; saved.add(curEv); $("#saveEv").textContent = "Salvato in La mia Napoli"; toast("Evento salvato in La mia Napoli"); });
+  // collegamento dalla home (Elodie)
+  $$('[data-go="evento"]').forEach(el => { el.removeAttribute("data-go"); el.dataset.ev = EVENTS.findIndex(x => x[2] === "Elodie"); });
+
+  // ---- Cultura: luoghi reali ----
+  const PLACES = [
+    ["Museo Archeologico Nazionale (MANN)", "Collezione Farnese e reperti di Pompei ed Ercolano, tra cui il mosaico di Alessandro", "Linea 1 · Museo"],
+    ["Cappella Sansevero", "Il Cristo velato di Giuseppe Sanmartino (1753), capolavoro della scultura in marmo", "Centro storico · Linea 1 Dante"],
+    ["Museo e Real Bosco di Capodimonte", "Reggia borbonica con pinacoteca: Caravaggio, Tiziano, Masaccio · parco di oltre 120 ettari", "Bus dal centro"],
+    ["Castel Nuovo · Maschio Angioino", "Castello del XIII secolo con l'arco trionfale aragonese, a due passi dal Molo Beverello", "Linea 1 · Municipio"],
+    ["Teatro di San Carlo", "Inaugurato nel 1737, il più antico teatro d'opera d'Europa ancora in attività", "Linea 1 · Municipio"],
+    ["Palazzo Reale e Piazza del Plebiscito", "Residenza dei re di Napoli affacciata sulla piazza simbolo della città", "Linea 1 · Municipio"],
+    ["Castel dell'Ovo", "Il castello più antico della città, sull'isolotto di Megaride lungo il mare", "Lungomare · Borgo Marinari"],
+    ["Certosa e Museo di San Martino", "Sulla collina del Vomero, con il celebre presepe Cuciniello e vista sul golfo", "Funicolare · Vomero"],
+    ["Napoli Sotterranea", "Cunicoli greco-romani e rifugi della Seconda guerra mondiale sotto il centro storico", "Centro storico"],
+    ["Via San Gregorio Armeno", "La strada dei presepi: botteghe artigiane aperte tutto l'anno, il clou a Natale", "Centro storico · Spaccanapoli"],
+    ["Centro storico di Napoli", "Patrimonio dell'umanità UNESCO dal 1995: Spaccanapoli, Duomo e decumani", "Linea 1 · Dante / Duomo"]
+  ];
+  $("#places").innerHTML = PLACES.map(([t,d,how]) => `<div class="item" style="align-items:flex-start"><span class="ico" style="background:#EFE6D4;color:#7A5C25;flex-shrink:0"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><line x1="3" x2="21" y1="22" y2="22"/><line x1="6" x2="6" y1="18" y2="11"/><line x1="10" x2="10" y1="18" y2="11"/><line x1="14" x2="14" y1="18" y2="11"/><line x1="18" x2="18" y1="18" y2="11"/><polygon points="12 2 20 7 4 7"/></svg></span><div style="min-width:0"><div class="t">${t}</div><div class="d">${d}</div><div class="cap" style="margin-top:4px;color:var(--sea-ink);font-weight:600">${how}</div></div></div>`).join("");
+
+  // ---- Informa: avvisi (reali o di esempio, sempre dichiarati) ----
+  const ALERTS = [
+    ["Viabilità", "America's Cup: Via Caracciolo e viale Anton Dohrn chiuse al traffico dal 22 maggio al 19 luglio 2027 per il Race Village; traffico deviato sulla Riviera di Chiaia", "Annunciato", "ann", "Piano del traffico definitivo da approvare · fonte: napolike.it"],
+    ["Cultura", "Domenica 1 novembre 2026 ingresso gratuito nei musei statali (Domenica al museo)", "Reale", "real", "Fonte: Ministero della Cultura"],
+    ["Porto", "Molo Beverello: partenza per Procida delle 10:40 spostata dal Molo A al Molo B", "Esempio", "ex", "Nella versione reale: avviso del gestore del terminal"],
+    ["Meteo", "Con mare molto mosso le corse degli aliscafi possono subire ritardi o cancellazioni: controlla vento e mare prima di partire", "Consiglio", "ann", "Dati in tempo reale nella sezione Meteo"],
+    ["Trasporti", "Linea 2: ritardi fino a 10 minuti tra Gianturco e Campi Flegrei", "Esempio", "ex", "Nella versione reale: Trenitalia / RFI"]
+  ];
+  $("#alerts").innerHTML = ALERTS.map(([c,t,l,cls,src]) => `<div class="item" style="align-items:flex-start"><div style="min-width:0;flex:1"><div class="row" style="gap:8px"><span class="status warn" style="margin-left:0">${c}</span><span class="tag ${cls}">${l}</span></div><div class="t" style="margin-top:6px;font-size:14px">${t}</div><div class="cap" style="margin-top:4px">${src}</div></div></div>`).join("");
+  const OFF = [["Comune di Napoli","Ordinanze di viabilità ed eventi","https://www.comune.napoli.it"],["ANM","Metro Linea 1, funicolari e bus","https://www.anm.it"],["EAV","Cumana, Circumflegrea e Circumvesuviana","https://www.eavsrl.it"],["Autorità di Sistema Portuale","Porto di Napoli","https://adsptirrenocentrale.it"]];
+  $("#offsrc").innerHTML = OFF.map(([t,d,u]) => `<a class="item lnk" href="${u}" target="_blank" rel="noopener"><div style="min-width:0"><div class="t">${t}</div><div class="d">${d}</div></div><span class="status ok" style="margin-left:auto">Apri ›</span></a>`).join("");
+
+  // ---- Meteo reale (Open-Meteo) ----
+  const WMO = (c) => c === 0 ? "Sereno" : c <= 2 ? "Poco nuvoloso" : c === 3 ? "Coperto" : c <= 48 ? "Nebbia" : c <= 57 ? "Pioviggine" : c <= 67 ? "Pioggia" : c <= 77 ? "Neve" : c <= 82 ? "Rovesci" : "Temporale";
+  const WIND = (deg) => ["Tramontana","Grecale","Levante","Scirocco","Ostro","Libeccio","Ponente","Maestrale"][Math.round(((deg % 360) / 45)) % 8];
+  const SEA = (h) => h == null ? "—" : h <= 0.1 ? "Quasi calmo" : h <= 0.5 ? "Poco mosso" : h <= 1.25 ? "Mosso" : h <= 2.5 ? "Molto mosso" : h <= 4 ? "Agitato" : "Molto agitato";
+  const today = new Date();
+  $("#wx-d").textContent = today.toLocaleDateString("it-IT", { weekday: "long", day: "numeric", month: "long" }) + " ·";
+  (async () => {
+    try {
+      const f = await (await fetch("https://api.open-meteo.com/v1/forecast?latitude=40.84&longitude=14.25&current=temperature_2m,apparent_temperature,weather_code,wind_speed_10m,wind_direction_10m,wind_gusts_10m&daily=weather_code,temperature_2m_max,temperature_2m_min&timezone=Europe%2FRome&forecast_days=3")).json();
+      let m = null; try { m = await (await fetch("https://marine-api.open-meteo.com/v1/marine?latitude=40.82&longitude=14.25&current=wave_height,wave_direction,wave_period,sea_surface_temperature&timezone=Europe%2FRome")).json(); } catch (e) {}
+      const c = f.current, t = Math.round(c.temperature_2m), w = Math.round(c.wind_speed_10m), g = Math.round(c.wind_gusts_10m), wn = WIND(c.wind_direction_10m);
+      $("#wx-t").textContent = t + "° " + WMO(c.weather_code).toLowerCase(); $("#wx-chip").textContent = wn + " " + w + " km/h ›";
+      $("#m-t").textContent = t + "°"; $("#m-cond").textContent = WMO(c.weather_code); $("#m-feel").textContent = "Percepita " + Math.round(c.apparent_temperature) + "°";
+      $("#m-wind").textContent = wn; $("#m-wind2").textContent = `${w} km/h · raffiche ${g} km/h`;
+      const mc = m && m.current; const wh = mc ? mc.wave_height : null;
+      $("#m-sea").textContent = SEA(wh); $("#m-sea2").textContent = mc ? `onde ${wh.toFixed(1)} m${mc.sea_surface_temperature != null ? " · acqua " + Math.round(mc.sea_surface_temperature) + "°" : ""}` : "dato non disponibile";
+      if ((wh != null && wh > 1.25) || g >= 50) { $("#m-warn").hidden = false; $("#m-warn").textContent = "Mare o vento sostenuti: possibili ritardi o cancellazioni degli aliscafi. Verifica con la compagnia prima di partire."; }
+      const DN = ["Oggi","Domani","Dopodomani"];
+      $("#m-days").innerHTML = f.daily.time.map((d, i) => `<div class="between" style="padding:10px 0;${i < 2 ? "border-bottom:1px solid var(--line)" : ""}"><span>${DN[i]} · ${WMO(f.daily.weather_code[i])}</span><b class="num">${Math.round(f.daily.temperature_2m_min[i])}° / ${Math.round(f.daily.temperature_2m_max[i])}°</b></div>`).join("");
+      $("#m-src").textContent = "Dati in tempo reale: Open-Meteo (modelli meteorologici nazionali, CC BY 4.0) · aggiornati alle " + new Date().toLocaleTimeString("it-IT", { hour: "2-digit", minute: "2-digit" });
+    } catch (e) {
+      $("#wx-t").textContent = "meteo"; $("#wx-chip").textContent = "Vento e mare ›";
+      $("#m-cond").textContent = "Dati in tempo reale non disponibili qui"; $("#m-feel").textContent = "Aprili nella versione pubblica o sulle fonti ufficiali qui sotto";
+      $("#m-days").innerHTML = '<div style="padding:10px 0" class="cap">Previsioni non disponibili in questa versione.</div>';
+    }
+  })();
+
   function renderSaved(){ $("#saved").innerHTML = Array.from(saved).map(t => `<div class="item"><span class="ico" style="background:var(--sun-soft);color:var(--sun-ink)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="m19 21-7-4-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16z"/></svg></span><div class="t">${t}</div></div>`).join(""); }
   $("#saveEv").addEventListener("click", () => { saved.add("Elodie · Palapartenope · 4 maggio"); $("#saveEv").textContent = "Salvato in La mia Napoli"; toast("Evento salvato in La mia Napoli"); });
   function switches(el, rows){ el.innerHTML = rows.map(([id,t,on],i) => `<div class="between" style="padding:12px 0;${i < rows.length-1 ? 'border-bottom:1px solid var(--line)' : ''}"><label for="${id}" style="font-size:14px">${t}</label><button class="switch" id="${id}" role="switch" aria-checked="${on}"></button></div>`).join(""); }
@@ -633,7 +817,9 @@ h2.hello{margin:0;font-size:28px;line-height:1.15;font-weight:700;letter-spacing
   switches($("#prefs"), [["p1","Usa la mia posizione (con consenso)",true],["p2","Lingua: italiano",true],["p3","Accessibilità: testo grande",false]]);
   document.addEventListener("click", e => { const s = e.target.closest(".switch"); if (s) s.setAttribute("aria-checked", s.getAttribute("aria-checked") !== "true"); });
 
-  document.addEventListener("click", e => { const h = e.target.closest("[data-href]"); if (h) location.href = h.dataset.href; });
+  const SITE = "https://castf21.github.io/napoli360/";
+  const ON_SITE = /github\.io$|^localhost$|^127\./.test(location.hostname);
+  document.addEventListener("click", e => { const h = e.target.closest("[data-href]"); if (!h) return; if (ON_SITE) location.href = h.dataset.href; else window.open(SITE + h.dataset.href, "_blank", "noopener"); });
   render("home");
   if (location.hash === "#porto") go("porto");
 })();
