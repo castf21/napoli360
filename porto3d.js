@@ -5,6 +5,8 @@
    3D: CesiumJS; se c'è il token Cesium ion, contesto fotorealistico Google Photorealistic 3D Tiles. */
 (async function () {
   const C = Cesium, CFG = window.N360;
+  const NOST = !!(window.N360A11Y && window.N360A11Y.get().nostairs); // percorsi senza scale
+  const SPEAK = (t) => window.N360A11Y && window.N360A11Y.speak(t);
   const $ = (s) => document.querySelector(s);
   const toast = (m, ms = 2600) => { const t = $("#toast"); t.textContent = m; t.classList.add("on"); clearTimeout(t._h); t._h = setTimeout(() => t.classList.remove("on"), ms); };
   const col = (hex, a = 1) => C.Color.fromCssColorString(hex).withAlpha(a);
@@ -170,7 +172,7 @@
   const addN = (c) => { const k = key(c); if (!nodes.has(k)) { nodes.set(k, c); adj.set(k, []); } return k; };
   for (const f of gj.features) {
     const p = f.properties, g = f.geometry;
-    if (g.type !== "LineString" || !p.highway || !WALK.test(p.highway) || p.indoor === "yes") continue;
+    if (g.type !== "LineString" || !p.highway || !WALK.test(p.highway) || p.indoor === "yes" || (NOST && p.highway === "steps")) continue;
     if (p.access === "private" || p.access === "no" || p.foot === "no") continue;
     const cs = g.coordinates;
     for (let i = 1; i < cs.length; i++) { const a = addN(cs[i - 1]), b = addN(cs[i]), d = dist(cs[i - 1], cs[i]) * (p.highway === "steps" ? 1.4 : 1); adj.get(a).push([b, d]); adj.get(b).push([a, d]); }
@@ -254,12 +256,13 @@
     const s = STEPS[k]; $("#r-now").textContent = s.txt; $("#r-ico").innerHTML = ICON[s.dir]; $("#r-ico").classList.toggle("done", s.dir === "done");
     $("#r-steps").innerHTML = STEPS.map((x, i) => `<li class="${x.last ? "last " : ""}${i === k ? "now" : i < k ? "done" : ""}"><span>${i + 1}</span>${x.txt}</li>`).join("");
     if (s.sign) toast("Cartello riconosciuto: " + s.sign + " · posizione aggiornata", 2200);
+    SPEAK(s.txt);
   };
   const minsOf = (m) => Math.max(1, Math.round(m / (CFG.walkSpeedKmh * 1000 / 60)));
   function intro() {
     $("#r-ico").innerHTML = ICON[mode === "out" ? "up" : "door"]; $("#r-ico").classList.remove("done");
     $("#r-now").textContent = mode === "out" ? "A piedi fino al terminal" : "Dentro il terminal fino al Molo B";
-    $("#r-sub").textContent = mode === "out" ? `${Math.round(OUT.total / 10) * 10} m da ${CFG.start.name} · camminamenti reali OSM` : `${Math.round(IN.total / 5) * 5} m · biglietterie, sala d'attesa, varco giallo`;
+    $("#r-sub").textContent = mode === "out" ? `${Math.round(OUT.total / 10) * 10} m da ${CFG.start.name} · camminamenti reali OSM${NOST ? " · senza scale ♿" : ""}` : `${Math.round(IN.total / 5) * 5} m · biglietterie, sala d'attesa, varco giallo`;
     $("#r-badge").textContent = `${minsOf(RT.total)} min`; $("#r-bar").style.width = "0%";
     $("#r-steps").innerHTML = STEPS.map((x, i) => `<li class="${x.last ? "last" : ""}"><span>${i + 1}</span>${x.txt}</li>`).join("");
     $("#b-go").textContent = mode === "out" ? "Simula il percorso" : "Simula il percorso interno";
@@ -331,6 +334,7 @@
   $("#t-bld")?.addEventListener("change", (e) => outdoorEnts.forEach((x) => { if (x.polygon) x.show = e.target.checked; }));
   if (PHOTO && $(".tgl")) $(".tgl").hidden = true;
 
+  if (window.N360Ships) window.N360Ships(viewer, { h: H0, onlyFerries: true });
   intro(); overview(0);
   if (location.hash === "#interno") location.replace("index.html#porto");
 })();

@@ -2,6 +2,8 @@
    con algoritmo Connection Scan (CSA), visualizzato in 3D con CesiumJS. */
 (async function () {
   const C = Cesium, CFG = window.N360, PL = window.N360_PLACES, OR = window.N360_ORIGINS;
+  const NOST = !!(window.N360A11Y && window.N360A11Y.get().nostairs); // senza scale: evita fermate dichiarate non accessibili
+  const SPEAK = (t) => window.N360A11Y && window.N360A11Y.speak(t);
   const $ = (s) => document.querySelector(s);
   const col = (h, a = 1) => C.Color.fromCssColorString(h).withAlpha(a);
   const toast = (m) => { const t = $("#toast"); t.textContent = m; t.classList.add("on"); clearTimeout(t._h); t._h = setTimeout(() => t.classList.remove("on"), 2600); };
@@ -63,9 +65,10 @@
     for (const [dep, arr, a, b, trip, pi] of connections(date, now, now + 3 * 3600)) {
       if (dep < now) continue;
       const bo0 = board.get(trip);
-      if (T[a] <= dep && (!bo0 || RC[a] < bo0.rc)) board.set(trip, { s: a, dep, rc: RC[a] }); // sali il più tardi possibile con meno cambi
+      if (T[a] <= dep && (!bo0 || RC[a] < bo0.rc) && !(NOST && TR.stops[SID[a]].w === 2)) board.set(trip, { s: a, dep, rc: RC[a] }); // sali il più tardi possibile con meno cambi
       const bo = board.get(trip); if (!bo) continue;
       const rc = bo.rc + 1;
+      if (NOST && TR.stops[SID[b]].w === 2) continue; // non scendere dove la fermata è dichiarata non accessibile
       if (arr < T[b] || (arr === T[b] && rc < RC[b])) {
         T[b] = arr; RC[b] = rc; prev[b] = { k: "r", from: bo.s, dep: bo.dep, arr, pi, trip };
         for (const [j, w] of FOOT[b]) if (arr + w < T[j]) { T[j] = arr + w; RC[j] = rc; prev[j] = { k: "w", from: b, w }; }
@@ -151,7 +154,8 @@
         const p = TR.patterns[L.pi], r = routeOf(L), LI = lineInfo(r), c = LI.c, i0 = p.s.indexOf(SID[L.from]), i1 = p.s.indexOf(SID[L.to]);
         const dark = r.s === "L1";
         pts = p.s.slice(i0, i1 + 1).map((s) => SP[SI.get(s)]); line(pts, c, 10, false);
-        const a = nice(TR.stops[SID[L.from]].n), b = nice(TR.stops[SID[L.to]].n), head = nice(p.h || TR.stops[p.s[p.s.length - 1]].n);
+        const acc = (i) => TR.stops[SID[i]].w === 1 ? " ♿" : "";
+        const a = nice(TR.stops[SID[L.from]].n) + acc(L.from), b = nice(TR.stops[SID[L.to]].n) + acc(L.to), head = nice(p.h || TR.stops[p.s[p.s.length - 1]].n);
         tag(SP[L.from], `Sali · ${a} · ${LI.badge}`, c, dark ? "#0A1A33" : "#FFFFFF");
         tag(SP[L.to], `Scendi · ${b}`, c, dark ? "#0A1A33" : "#FFFFFF");
         const nx = nextDeps(L, DATE).map(hhmm).join(" · ");
@@ -164,9 +168,13 @@
     $("#legs").innerHTML = html.join("");
     const dur = Math.round((J.arrive - J.legs[0].dep) / 60);
     $("#r-now").textContent = `Arrivo alle ${hhmm(J.arrive)}`;
-    $("#r-sub").textContent = `Da ${O.n} · partenza ${hhmm(J.legs[0].dep)}${note}`;
+    $("#r-sub").textContent = `Da ${O.n} · partenza ${hhmm(J.legs[0].dep)}${note}${NOST ? " · senza scale ♿" : ""}`;
     $("#r-badge").textContent = `${dur} min`;
     $("#foot").textContent = `Orari programmati ANM ed EAV (GTFS ufficiali; EAV con licenza IODL 2.0), aggiornati il ${TR.generated.slice(8, 10)}/${TR.generated.slice(5, 7)}${TR.hasBus ? "" : " · bus non disponibili"} · non includono scioperi o ritardi: verifica su anm.it ed eavsrl.it · mappa © OpenStreetMap contributors · 3D CesiumJS`;
+    fetch("data/qualita.json", { cache: "no-cache" }).then((r) => r.json()).then((q) => {
+      const ok = q.feeds.filter((f) => f.ok).map((f) => `${f.name} ${f.errori === 0 ? "0 errori" : f.errori + " errori"}`).join(", ");
+      if (ok) $("#foot").textContent += ` · orari verificati dal validatore MobilityData (${ok})`;
+    }).catch(() => {});
     overview(0);
   }
   function overview(dur = 1.4) {
@@ -181,7 +189,7 @@
   const walker = () => viewer.entities.getById("walker") || viewer.entities.add({ id: "walker", position: C.Cartesian3.fromDegrees(path[0][0], path[0][1], H0),
     point: { pixelSize: 18, color: col("#0E7BC4"), outlineColor: C.Color.WHITE, outlineWidth: 4, ...CLAMP } });
   const brg = (a, b) => Math.atan2((b[0] - a[0]) * Math.cos(a[1] * rad), b[1] - a[1]) / rad;
-  let raf = null, t0 = 0, head = 0;
+  let raf = null, t0 = 0, head = 0, lastLeg = -1;
   function at(m) { let i = 1; while (i < pathCum.length - 1 && pathCum[i] < m) i++; const a = path[i - 1], b = path[i], t = Math.min(1, Math.max(0, (m - pathCum[i - 1]) / ((pathCum[i] - pathCum[i - 1]) || 1))); return [[a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t], i - 1]; }
   function tick(ts) {
     if (!t0) t0 = ts;
@@ -193,9 +201,10 @@
     $("#r-bar").style.width = (k * 100).toFixed(1) + "%";
     let li = 0; legMarks.forEach((s, i) => { if (seg >= s) li = i; });
     document.querySelectorAll(".legs li").forEach((el) => el.classList.toggle("now", +el.dataset.l === li));
+    if (li !== lastLeg) { lastLeg = li; const el = document.querySelector(`.legs li[data-l="${li}"] .t`); if (el) SPEAK(el.textContent.replace("♿", "")); }
     if (k < 1) raf = requestAnimationFrame(tick); else { raf = null; $("#b-go").textContent = "Rivedi"; toast("Sei arrivato: " + DEST.n); }
   }
-  $("#b-go").addEventListener("click", () => { cancelAnimationFrame(raf); t0 = 0; head = brg(path[0], path[Math.min(2, path.length - 1)]); $("#b-go").textContent = "Simulazione in corso…"; raf = requestAnimationFrame(tick); });
+  $("#b-go").addEventListener("click", () => { cancelAnimationFrame(raf); t0 = 0; lastLeg = -1; head = brg(path[0], path[Math.min(2, path.length - 1)]); $("#b-go").textContent = "Simulazione in corso…"; raf = requestAnimationFrame(tick); });
   $("#b-view").addEventListener("click", () => { cancelAnimationFrame(raf); raf = null; $("#b-go").textContent = "Simula il percorso"; overview(); });
 
   // ---------- partenze ----------

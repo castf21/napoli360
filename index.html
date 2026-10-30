@@ -4,6 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>NAPOLI 360 Prototipo</title>
+<script src="a11y.js"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap">
 <style>
@@ -354,6 +355,7 @@ h2.hello{margin:0;font-size:28px;line-height:1.15;font-weight:700;letter-spacing
         <div class="pad" style="padding-top:12px">
           <div class="row" style="gap:6px;flex-wrap:wrap"><span class="tag real">Reale</span><span class="tag ann">Annunciato</span><span class="cap">notizie pubblicate</span><span class="tag ex" style="margin-left:6px">Esempio</span><span class="cap">simulato per la demo</span></div>
           <div class="list" id="alerts"></div>
+          <div id="dq" hidden></div>
           <div class="mth">Fonti ufficiali che l'app integrerebbe</div>
           <div class="list" id="offsrc"></div>
         </div>
@@ -375,6 +377,9 @@ h2.hello{margin:0;font-size:28px;line-height:1.15;font-weight:700;letter-spacing
         <div class="pad">
           <div class="row" style="gap:14px"><span class="avatar" style="width:56px;height:56px;border-radius:28px;font-size:20px">G</span><div><h2 class="hello" style="font-size:22px">Giulia</h2><div class="cap">Vomero · utente di esempio</div></div></div>
           <div class="card" style="padding:4px 14px" id="prefs"></div>
+          <div class="ovl" style="color:var(--ink2)">Accessibilità</div>
+          <div class="card" style="padding:4px 14px" id="a11y"></div>
+          <div class="cap" style="line-height:1.45">Con «Percorsi senza scale» il calcolo evita i gradini nei tratti a piedi del porto e le fermate che ANM ed EAV dichiarano non accessibili. Le preferenze restano solo su questo telefono.</div>
           <div class="card" style="padding:14px;font-size:13px;line-height:1.5;color:var(--ink2)">Questo è un prototipo navigabile di NAPOLI 360. I dati sono simulati, Partenope usa risposte preparate e la realtà aumentata è un'animazione dimostrativa.</div>
         </div>
       </section>
@@ -668,6 +673,7 @@ Regole: rispondi in italiano chiaro, cordiale, con al massimo un tocco di napole
     else { $("#mmdot").style.transform = `translate(${st.pt[0]}px,${st.pt[1]}px)`; setTimeout(() => { if (ti === i) $("#mm-svg").innerHTML = miniSVG(st); }, 1250); }
     $("#mm-room").textContent = ROOMS.find(r => r.id === st.room).n;
     $("#tour-title").textContent = st.title; $("#tour-sub").textContent = st.sub;
+    if (window.N360A11Y && !first) window.N360A11Y.speak(st.title + ". " + st.sub);
     $("#tour-ico").innerHTML = IC[st.dir];
     $("#tour-ico").style.background = st.dir === "done" ? "var(--ok-soft)" : "var(--sea-soft)"; $("#tour-ico").style.color = st.dir === "done" ? "var(--ok)" : "var(--sea)";
     $("#tour-dist").textContent = st.dist; $("#tour-det").textContent = "Riconosciuto: " + st.det;
@@ -783,6 +789,18 @@ Regole: rispondi in italiano chiaro, cordiale, con al massimo un tocco di napole
     ["Trasporti", "Linea 2: ritardi fino a 10 minuti tra Gianturco e Campi Flegrei", "Esempio", "ex", "Nella versione reale: Trenitalia / RFI"]
   ];
   $("#alerts").innerHTML = ALERTS.map(([c,t,l,cls,src]) => `<div class="item" style="align-items:flex-start"><div style="min-width:0;flex:1"><div class="row" style="gap:8px"><span class="status warn" style="margin-left:0">${c}</span><span class="tag ${cls}">${l}</span></div><div class="t" style="margin-top:6px;font-size:14px">${t}</div><div class="cap" style="margin-top:4px">${src}</div></div></div>`).join("");
+  // ---- Qualità dei dati (validatore ufficiale MobilityData, eseguito ogni notte) ----
+  (async () => { try {
+    const q = await (await fetch("data/qualita.json", { cache: "no-cache" })).json();
+    const d = q.generated.slice(8, 10) + "/" + q.generated.slice(5, 7);
+    $("#dq").innerHTML = `<div class="mth">Qualità degli orari ufficiali · controllo del ${d}</div><div class="list">` + q.feeds.map((f) => {
+      const ok = f.ok && f.errori === 0, c = f.controlli || {};
+      return `<div class="item" style="align-items:flex-start"><div style="min-width:0;flex:1"><div class="row" style="gap:8px"><b>${f.name}</b><span class="tag ${ok ? "real" : "ex"}">${f.ok ? (f.errori === 0 ? "0 errori" : f.errori + " errori") : "non verificato"}</span>${f.ok ? `<span class="cap">${f.avvisi} avvisi minori</span>` : ""}</div>
+        <div class="cap" style="margin-top:4px">${(c.corse_oggi || 0).toLocaleString("it-IT")} corse oggi · ${c.fermate || 0} fermate${c.giorni_senza_servizio_prossimi_7 && c.giorni_senza_servizio_prossimi_7.length ? " · giorni senza orari: " + c.giorni_senza_servizio_prossimi_7.join(", ") : " · orari presenti per i prossimi 7 giorni"}${f.validita && f.validita.feedServiceWindowEnd ? " · validi fino al " + f.validita.feedServiceWindowEnd.split("-").reverse().join("/") : ""}</div>
+        ${f.html ? `<a class="cap" style="color:var(--sea-ink);font-weight:700" href="${f.html}" target="_blank" rel="noopener">Rapporto completo del validatore ›</a>` : ""}</div></div>`;
+    }).join("") + `</div><div class="cap" style="margin-top:6px">Controllo automatico con gtfs-validator di MobilityData (${q.validator.replace("gtfs-validator-", "v").replace("-cli.jar", "")}).</div>`;
+    $("#dq").hidden = false;
+  } catch (e) {} })();
   const OFF = [["Comune di Napoli","Ordinanze di viabilità ed eventi","https://www.comune.napoli.it"],["ANM","Metro Linea 1, funicolari e bus","https://www.anm.it"],["EAV","Cumana, Circumflegrea e Circumvesuviana","https://www.eavsrl.it"],["Autorità di Sistema Portuale","Porto di Napoli","https://adsptirrenocentrale.it"]];
   $("#offsrc").innerHTML = OFF.map(([t,d,u]) => `<a class="item lnk" href="${u}" target="_blank" rel="noopener"><div style="min-width:0"><div class="t">${t}</div><div class="d">${d}</div></div><span class="status ok" style="margin-left:auto">Apri ›</span></a>`).join("");
 
@@ -817,8 +835,12 @@ Regole: rispondi in italiano chiaro, cordiale, con al massimo un tocco di napole
   $("#saveEv").addEventListener("click", () => { saved.add("Elodie · Palapartenope · 4 maggio"); $("#saveEv").textContent = "Salvato in La mia Napoli"; toast("Evento salvato in La mia Napoli"); });
   function switches(el, rows){ el.innerHTML = rows.map(([id,t,on],i) => `<div class="between" style="padding:12px 0;${i < rows.length-1 ? 'border-bottom:1px solid var(--line)' : ''}"><label for="${id}" style="font-size:14px">${t}</label><button class="switch" id="${id}" role="switch" aria-checked="${on}"></button></div>`).join(""); }
   switches($("#notifs"), [["n1","Cambi di molo e ritardi",true],["n2","Eventi salvati",true],["n3","Avvisi di viabilità",false]]);
-  switches($("#prefs"), [["p1","Usa la mia posizione (con consenso)",true],["p2","Lingua: italiano",true],["p3","Accessibilità: testo grande",false]]);
-  document.addEventListener("click", e => { const s = e.target.closest(".switch"); if (s) s.setAttribute("aria-checked", s.getAttribute("aria-checked") !== "true"); });
+  const A11 = window.N360A11Y ? window.N360A11Y.get() : {};
+  switches($("#prefs"), [["p1","Usa la mia posizione (con consenso)",true],["p2","Lingua: italiano",true]]);
+  switches($("#a11y"), [["a-big","Testo grande",!!A11.big],["a-hc","Alto contrasto",!!A11.hc],["a-voice","Indicazioni lette a voce (e vibrazione)",!!A11.voice],["a-nostairs","Percorsi senza scale",!!A11.nostairs]]);
+  const A11MAP = { "a-big": "big", "a-hc": "hc", "a-voice": "voice", "a-nostairs": "nostairs" };
+  document.addEventListener("click", e => { const s = e.target.closest(".switch"); if (!s) return; const on = s.getAttribute("aria-checked") !== "true"; s.setAttribute("aria-checked", on);
+    if (A11MAP[s.id] && window.N360A11Y) { window.N360A11Y.set(A11MAP[s.id], on); toast(on ? "Attivato: " + s.parentElement.querySelector("label").textContent : "Disattivato"); } });
 
   const SITE = "https://castf21.github.io/napoli360/";
   const ON_SITE = /github\.io$|^localhost$|^127\./.test(location.hostname);

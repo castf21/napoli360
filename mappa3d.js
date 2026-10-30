@@ -54,6 +54,16 @@
   }
 
   let filter = "tutto", sel = null;
+  // navi in tempo reale (AIS)
+  const SH = window.N360Ships ? window.N360Ships(viewer, { h: H0, onUpdate: () => { if (filter === "navi") renderList(); } }) : null;
+  function showShip(id) {
+    const s = SH.info(id); sel = null;
+    $("#p-cat").textContent = "Nave · AIS in tempo reale"; $("#p-cat").style.color = "#0E7BC4";
+    $("#p-name").textContent = s.name;
+    $("#p-desc").textContent = `${s.kind} · ${s.sog}${s.dest ? " · destinazione " + s.dest : ""}${s.eta ? " · arrivo stimato al Beverello tra ~" + s.eta + " min" : ""} · posizione di ${s.age} min fa`;
+    $("#p-go").hidden = true; $("#p-route").hidden = true;
+    viewer.camera.flyToBoundingSphere(new C.BoundingSphere(C.Cartesian3.fromDegrees(s.lon, s.lat, H0), 80), { offset: new C.HeadingPitchRange(0, C.Math.toRadians(-35), 1400), duration: 1.6 });
+  }
   const ents = P.map((p, i) => {
     const [name, cat, lat, lon, z] = p, c = CAT[cat][1];
     return viewer.entities.add({ id: "p" + i, position: C.Cartesian3.fromDegrees(lon, lat, H0 + z + 25),
@@ -76,17 +86,26 @@
   }
   const $$ = (s) => Array.from(document.querySelectorAll(s));
   function renderList() {
+    if (filter === "navi") {
+      ents.forEach((e) => (e.show = false));
+      if (!SH || !SH.ok) { $("#plist").innerHTML = '<span class="cap">Posizioni delle navi non ancora disponibili.</span>'; return; }
+      const arr = SH.arrivals();
+      $("#plist").innerHTML = (arr.length ? arr.map((x) => `<button class="pbtn" data-ship="${x.id}">⛴ ${x.name} · ~${x.eta}′</button>`).join("") : '<span class="cap">Nessuna nave diretta al Beverello in questo momento.</span>')
+        + `<span class="cap" style="align-self:center;white-space:nowrap">· aggiornato alle ${SH.updated.toLocaleTimeString("it-IT", { hour: "2-digit", minute: "2-digit" })}</span>`;
+      return;
+    }
     const items = P.map((p, i) => [p, i]).filter(([p]) => filter === "tutto" || p[1] === filter);
     $("#plist").innerHTML = items.map(([p, i]) => `<button class="pbtn" data-i="${i}" aria-current="${i === sel}">${p[0]}</button>`).join("");
     ents.forEach((e, i) => (e.show = filter === "tutto" || P[i][1] === filter));
   }
-  $("#chips").innerHTML = [["tutto", "Tutto", "#0A1A33"], ...Object.entries(CAT).map(([k, v]) => [k, v[0], v[1]])]
+  $("#chips").innerHTML = [["tutto", "Tutto", "#0A1A33"], ...Object.entries(CAT).map(([k, v]) => [k, v[0], v[1]]), ["navi", "⛴ Navi live", "#0E7BC4"]]
     .map(([k, n, c]) => `<button class="chip" data-f="${k}" aria-pressed="${k === "tutto"}"><i style="background:${c}"></i>${n}</button>`).join("");
   document.addEventListener("click", (e) => {
     const f = e.target.closest("[data-f]"); if (f) { filter = f.dataset.f; $$(".chip").forEach((c) => c.setAttribute("aria-pressed", String(c === f))); renderList(); return; }
     const b = e.target.closest("[data-i]"); if (b) select(+b.dataset.i);
+    const sh = e.target.closest("[data-ship]"); if (sh && SH) showShip(sh.dataset.ship);
   });
-  viewer.selectedEntityChanged.addEventListener((en) => { if (en && /^p\d+$/.test(en.id)) select(+en.id.slice(1)); viewer.selectedEntity = undefined; });
+  viewer.selectedEntityChanged.addEventListener((en) => { if (en && /^p\d+$/.test(en.id)) select(+en.id.slice(1)); else if (en && SH && SH.isShip(en)) showShip(SH.idOf(en)); viewer.selectedEntity = undefined; });
   $("#p-all").addEventListener("click", () => overview());
   renderList(); overview(0);
   if (location.hash === "#porto") select(0);

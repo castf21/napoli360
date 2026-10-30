@@ -1,0 +1,35 @@
+name: Navi in tempo reale (AIS)
+
+on:
+  schedule:
+    - cron: "*/10 * * * *"   # circa ogni 10 minuti (GitHub può ritardare)
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: navi
+  cancel-in-progress: false
+
+jobs:
+  ais:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install websockets==13.1
+      - name: Ascolta le posizioni AIS nel Golfo di Napoli
+        env:
+          AISSTREAM_KEY: ${{ secrets.AISSTREAM_KEY }}
+        run: python scripts/navi.py
+      - name: Pubblica l'istantanea sul ramo live
+        run: |
+          cd /tmp/live
+          git init -q -b live
+          git add ships.json
+          git -c user.name="github-actions[bot]" -c user.email="41898282+github-actions[bot]@users.noreply.github.com" commit -qm "Navi: istantanea AIS"
+          git push -q -f "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git" live
