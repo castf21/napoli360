@@ -1,0 +1,96 @@
+{
+ "generated": "2026-10-30T16:31Z",
+ "validator": "gtfs-validator-8.0.1-cli.jar",
+ "feeds": [
+  {
+   "name": "ANM",
+   "ok": true,
+   "errori": 0,
+   "avvisi": 2176,
+   "info": 0,
+   "principali": [
+    {
+     "codice": "mixed_case_recommended_field",
+     "gravita": "WARNING",
+     "quanti": 1620
+    },
+    {
+     "codice": "leading_or_trailing_whitespaces",
+     "gravita": "WARNING",
+     "quanti": 393
+    },
+    {
+     "codice": "same_route_and_agency_url",
+     "gravita": "WARNING",
+     "quanti": 112
+    },
+    {
+     "codice": "inconsistent_route_type_for_block_id",
+     "gravita": "WARNING",
+     "quanti": 50
+    },
+    {
+     "codice": "missing_recommended_file",
+     "gravita": "WARNING",
+     "quanti": 1
+    }
+   ],
+   "html": "data/qualita/ANM.html",
+   "controlli": {
+    "corse_oggi": 10959,
+    "giorni_senza_servizio_prossimi_7": [],
+    "fermate": 2365,
+    "fermate_accessibili_dichiarate": 0
+   },
+   "validita": {
+    "feedServiceWindowStart": "2026-10-19",
+    "feedServiceWindowEnd": "2026-12-31"
+   }
+  },
+  {
+   "name": "EAV",
+   "ok": true,
+   "errori": 0,
+   "avvisi": 81,
+   "info": 6648,
+   "principali": [
+    {
+     "codice": "leading_or_trailing_whitespaces",
+     "gravita": "WARNING",
+     "quanti": 62
+    },
+    {
+     "codice": "mixed_case_recommended_field",
+     "gravita": "WARNING",
+     "quanti": 17
+    },
+    {
+     "codice": "missing_recommended_file",
+     "gravita": "WARNING",
+     "quanti": 1
+    },
+    {
+     "codice": "trip_coverage_not_active_for_next7_days",
+     "gravita": "WARNING",
+     "quanti": 1
+    },
+    {
+     "codice": "unsorted_stop_times",
+     "gravita": "INFO",
+     "quanti": 6648
+    }
+   ],
+   "html": "data/qualita/EAV.html",
+   "controlli": {
+    "corse_oggi": 682,
+    "giorni_senza_servizio_prossimi_7": [],
+    "fermate": 127,
+    "fermate_accessibili_dichiarate": 0
+   },
+   "validita": {
+    "feedServiceWindowStart": "2025-09-15",
+    "feedServiceWindowEnd": "2030-12-31"
+   }
+  }
+ ]
+}
