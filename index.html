@@ -3,51 +3,641 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>NAPOLI 360 · Port Vision AI · Molo Beverello</title>
+<title>NAPOLI 360 Prototipo</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap">
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/cesium@1.123.0/Build/Cesium/Widgets/widgets.css">
-<link rel="stylesheet" href="style.css">
-<script src="config.js"></script>
-<script>window.CESIUM_BASE_URL = window.N360.cesium;</script>
-<script src="https://cdn.jsdelivr.net/npm/cesium@1.123.0/Build/Cesium/Cesium.js"></script>
+<style>
+/* Layout: un telefono al centro su desktop, app a tutto schermo su smartphone. Look unico chiaro "Mediterraneo" (scelta deliberata, come nei mockup del pitch). */
+:root{
+  --night:#0A1A33; --sea:#0E7BC4; --sea-ink:#0B6AA9; --sea-soft:#E3F0FA; --sun:#F2B33D; --sun-soft:#FDF1D6; --sun-ink:#8A5A07;
+  --coral:#D94A39; --coral-soft:#FDE5E1; --coral-ink:#8A2B20; --ok:#13704C; --ok-soft:#DDF3EA;
+  --ink:#0A1A33; --ink2:#4E5D73; --ink3:#66738A; --line:#E4E8EE; --surface:#FFFFFF; --surface2:#F4F6F9; --stage:#DCE3EC; --quay:#B9B09F;
+  --f:'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --r-md:14px; --r-lg:20px; --shadow:0 1px 2px rgba(10,26,51,.06),0 6px 20px rgba(10,26,51,.08); --float:0 10px 30px rgba(10,26,51,.25);
+  color-scheme:light;
+}
+html,body{height:100%}
+body{background:var(--stage);color:var(--ink);font-family:var(--f);-webkit-font-smoothing:antialiased}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+button{font-family:inherit;color:inherit;cursor:pointer}
+button:focus-visible,a:focus-visible,input:focus-visible{outline:3px solid var(--sun);outline-offset:2px}
+.stage{min-height:100%;display:flex;gap:40px;align-items:center;justify-content:center;padding-block:28px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));flex-wrap:wrap}
+.side{max-width:300px;display:flex;flex-direction:column;gap:14px}
+.side h1{margin:0;font-size:26px;line-height:1.15;letter-spacing:-.02em;text-wrap:balance}
+.side h1 span{color:var(--sea)}
+.side p{margin:0;font-size:14px;line-height:1.55;color:var(--ink2)}
+.side .tag{align-self:flex-start;background:var(--night);color:var(--sun);border-radius:999px;padding:6px 12px;font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase}
+.side ul{margin:0;padding-left:18px;font-size:14px;line-height:1.6;color:var(--ink2)}
+.device{width:414px;height:868px;border-radius:66px;background:#0B0F17;padding:12px;box-shadow:0 30px 60px rgba(10,26,51,.35),inset 0 0 0 2px #2A3140;flex-shrink:0;position:relative}
+.island{position:absolute;top:22px;left:50%;transform:translateX(-50%);width:120px;height:34px;border-radius:20px;background:#000;z-index:80;pointer-events:none}
+.screen{width:390px;height:844px;border-radius:54px;overflow:hidden;position:relative;background:var(--surface2)}
+@media (max-width:520px){
+  .stage{padding:0;gap:0;display:block}
+  .side{display:none}
+  .device{width:100%;height:100%;border-radius:0;padding:0;box-shadow:none;background:var(--surface2)}
+  .island{display:none}
+  .screen{width:100%;height:100%;border-radius:0}
+  html,body,.stage{height:100%}
+}
+.view{position:absolute;inset:0;overflow-y:auto;padding-bottom:96px;scrollbar-width:none}
+.view::-webkit-scrollbar{display:none}
+.pad{padding:58px 20px 0;display:flex;flex-direction:column;gap:12px}
+@media (max-width:520px){.pad{padding-top:calc(18px + env(safe-area-inset-top,0px))}}
+.row{display:flex;align-items:center;gap:10px}
+.between{display:flex;justify-content:space-between;align-items:center;gap:10px}
+.logo{font-weight:800;font-size:17px;letter-spacing:-.01em}.logo b{color:var(--sea)}.logo i{color:var(--coral);font-style:normal}
+.avatar{width:36px;height:36px;border-radius:18px;background:var(--sun);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;border:0}
+h2.hello{margin:0;font-size:28px;line-height:1.15;font-weight:700;letter-spacing:-.02em}
+.cap{font-size:12.5px;color:var(--ink2)}
+.ovl{font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase}
+.card{background:var(--surface);border-radius:var(--r-lg);box-shadow:var(--shadow)}
+.ask{height:50px;border-radius:var(--r-md);background:var(--surface);box-shadow:var(--shadow);display:flex;align-items:center;gap:10px;padding:0 14px;border:0;width:100%;text-align:left;font-size:15px;color:var(--ink3)}
+.ask span{flex:1}
+.hero{background:var(--night);color:#fff;border-radius:var(--r-lg);padding:16px;display:flex;flex-direction:column;gap:12px;position:relative;overflow:hidden}
+.hero .big{font-size:24px;font-weight:800;letter-spacing:-.01em;font-variant-numeric:tabular-nums}
+.hero .sub{font-size:13px;color:#B9C4D4;margin-top:4px}
+.bar{height:6px;border-radius:3px;background:rgba(255,255,255,.14)}.bar>div{height:6px;border-radius:3px;background:var(--sun);transition:width .6s}
+.pill{display:inline-flex;align-items:center;gap:6px;border-radius:999px;padding:6px 10px;font-size:12px;font-weight:600}
+.alert{display:flex;gap:8px;align-items:flex-start;border-radius:10px;padding:9px 10px;font-size:12.5px;font-weight:600;line-height:1.35}
+.alert.dark{background:rgba(242,107,91,.18);color:#FFD3CC}
+.alert.light{background:var(--coral-soft);color:var(--coral-ink)}
+.btn{height:44px;border-radius:12px;border:0;font-size:14.5px;font-weight:700;display:flex;align-items:center;justify-content:center;gap:8px;width:100%}
+.btn.white{background:#fff;color:var(--night)}.btn.dark{background:var(--night);color:#fff}.btn.ghost{background:transparent;border:1.5px solid var(--night);color:var(--night)}.btn.soft{background:var(--surface2);color:var(--night)}.btn.sun{background:var(--sun);color:var(--night)}
+.grid3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.tile{height:72px;border:0;border-radius:var(--r-md);background:var(--surface);box-shadow:var(--shadow);display:flex;flex-direction:column;align-items:flex-start;justify-content:space-between;padding:11px 12px;font-size:12.5px;font-weight:650;text-align:left}
+.ico{width:32px;height:32px;border-radius:10px;display:flex;align-items:center;justify-content:center}
+.ev{display:flex;gap:12px;padding:9px 10px;align-items:center;border:0;width:100%;text-align:left;border-radius:var(--r-md)}
+.thumb{width:64px;height:52px;border-radius:10px;flex-shrink:0;background:linear-gradient(180deg,#1B1240,#0A1A33);position:relative;overflow:hidden}
+.thumb::before{content:"";position:absolute;left:10px;top:0;width:0;height:0;border-left:10px solid transparent;border-right:10px solid transparent;border-top:44px solid rgba(242,179,61,.6)}
+.thumb::after{content:"";position:absolute;left:0;right:0;bottom:0;height:12px;background:#05070D}
+.tabbar{position:absolute;left:0;right:0;bottom:0;height:84px;background:rgba(255,255,255,.97);border-top:1px solid var(--line);display:flex;justify-content:space-around;align-items:flex-start;padding-top:10px;z-index:40;padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (max-width:520px){.tabbar{height:calc(76px + env(safe-area-inset-bottom,0px))}}
+.tab{border:0;background:transparent;display:flex;flex-direction:column;align-items:center;gap:4px;font-size:11px;font-weight:600;color:var(--ink3);min-width:52px}
+.tab[aria-current="page"]{color:var(--sea-ink)}
+.tab.center{margin-top:-24px;color:var(--ink)}
+.tab.center .fab{width:56px;height:56px;border-radius:28px;background:var(--night);color:var(--sun);display:flex;align-items:center;justify-content:center;box-shadow:var(--float)}
+.topbar{display:flex;align-items:center;gap:10px;padding:54px 16px 12px;background:var(--surface);border-bottom:1px solid var(--line);position:sticky;top:0;z-index:20}
+@media (max-width:520px){.topbar{padding-top:calc(14px + env(safe-area-inset-top,0px))}}
+.back{border:0;background:transparent;width:36px;height:36px;display:flex;align-items:center;justify-content:center;border-radius:18px}
+.topbar h3{margin:0;font-size:16px;font-weight:700}
+.list{display:flex;flex-direction:column;gap:10px}
+.item{background:var(--surface);border-radius:var(--r-md);box-shadow:var(--shadow);padding:12px 14px;display:flex;gap:12px;align-items:center;border:0;text-align:left;width:100%}
+.item .t{font-size:14.5px;font-weight:650}
+.item .d{font-size:12.5px;color:var(--ink2);margin-top:2px}
+.status{margin-left:auto;font-size:12px;font-weight:700;border-radius:999px;padding:5px 9px;white-space:nowrap}
+.status.ok{background:var(--ok-soft);color:var(--ok)}.status.warn{background:var(--sun-soft);color:var(--sun-ink)}.status.bad{background:var(--coral-soft);color:var(--coral-ink)}
+.demo{font-size:11px;color:var(--ink3);text-align:center;padding:8px 0 4px}
+.scrim{position:absolute;inset:0;background:rgba(10,26,51,.5);z-index:50;opacity:0;transition:opacity .25s}
+.scrim.on{opacity:1}
+.sheet{position:absolute;left:0;right:0;bottom:0;background:#fff;border-radius:30px 30px 0 0;z-index:60;padding:12px 20px calc(30px + env(safe-area-inset-bottom,0px));display:flex;flex-direction:column;gap:16px;transform:translateY(100%);transition:transform .3s cubic-bezier(.2,.8,.2,1);box-shadow:0 -10px 40px rgba(0,0,0,.25)}
+.sheet.on{transform:none}
+.grab{width:40px;height:5px;border-radius:3px;background:var(--line);align-self:center}
+.qgrid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.q{background:var(--surface2);border:0;border-radius:16px;padding:14px;display:flex;flex-direction:column;gap:10px;min-height:96px;text-align:left;font-size:14px;font-weight:650;line-height:1.3}
+.inputrow{display:flex;gap:10px;align-items:center}
+.inputrow input{flex:1;height:52px;border-radius:26px;background:var(--surface2);border:0;padding:0 18px;font:500 15px var(--f);color:var(--ink);min-width:0}
+.mic{width:56px;height:56px;border-radius:28px;background:var(--night);color:var(--sun);border:0;display:flex;align-items:center;justify-content:center;box-shadow:var(--float);flex-shrink:0}
+.chat{display:flex;flex-direction:column;gap:12px;padding:16px}
+.me{align-self:flex-end;max-width:80%;background:var(--sea);color:#fff;border-radius:18px 18px 4px 18px;padding:11px 14px;font-size:15px;line-height:1.4}
+.bot{max-width:94%;background:#fff;border-radius:18px 18px 18px 4px;padding:14px;box-shadow:var(--shadow);display:flex;flex-direction:column;gap:12px;font-size:15px;line-height:1.45}
+.step{display:flex;gap:10px}.step .n{width:28px;height:28px;border-radius:14px;color:#fff;font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.step .t{font-size:14px;font-weight:650}.step .d{font-size:12.5px;color:var(--ink2)}
+.src{display:flex;gap:6px;flex-wrap:wrap}.src span{background:var(--surface2);color:var(--ink2);border-radius:999px;padding:5px 9px;font-size:12px;font-weight:600}
+.typing{display:flex;gap:5px;padding:14px;background:#fff;border-radius:18px;align-self:flex-start;box-shadow:var(--shadow)}
+.typing i{width:7px;height:7px;border-radius:4px;background:var(--ink3);animation:blink 1.2s infinite}.typing i:nth-child(2){animation-delay:.2s}.typing i:nth-child(3){animation-delay:.4s}
+@keyframes blink{0%,80%,100%{opacity:.25}40%{opacity:1}}
+.chatbar{position:absolute;left:0;right:0;bottom:0;padding:10px 16px calc(26px + env(safe-area-inset-bottom,0px));background:#fff;border-top:1px solid var(--line);display:flex;gap:10px;align-items:center;z-index:30}
+.chatbar input{flex:1;height:46px;border-radius:23px;background:var(--surface2);border:0;padding:0 16px;font:500 15px var(--f);min-width:0}
+.send{width:46px;height:46px;border-radius:23px;border:0;background:var(--sun);color:var(--night);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.chips{display:flex;gap:8px;flex-wrap:wrap}.chips button{border:1px solid var(--line);background:#fff;border-radius:999px;padding:8px 12px;font-size:12.5px;font-weight:600}
+.ar{position:absolute;inset:0;background:#000}
+.ar svg.scene{position:absolute;inset:0;width:100%;height:100%}
+.chev{animation:chev 1.6s infinite}
+@keyframes chev{0%{opacity:.25}30%{opacity:1}100%{opacity:.25}}
+.arcard{position:absolute;left:16px;right:16px;background:#fff;border-radius:18px;padding:12px 14px;display:flex;align-items:center;gap:12px;box-shadow:var(--float);z-index:5}
+.marker{position:absolute;z-index:5;display:flex;flex-direction:column;align-items:center;transform:translateX(-50%)}
+.marker .box{background:#fff;border-radius:12px;padding:7px 11px;text-align:center;box-shadow:var(--float)}
+.arsheet{position:absolute;left:0;right:0;bottom:0;background:#fff;border-radius:26px 26px 0 0;padding:10px 20px calc(28px + env(safe-area-inset-bottom,0px));display:flex;flex-direction:column;gap:12px;z-index:6}
+.toast{position:absolute;left:50%;bottom:110px;transform:translateX(-50%) translateY(20px);background:var(--night);color:#fff;border-radius:12px;padding:10px 14px;font-size:13px;font-weight:600;z-index:90;opacity:0;transition:all .25s;width:max-content;max-width:86%;text-align:center;pointer-events:none}
+.toast.on{opacity:1;transform:translateX(-50%)}
+.switch{width:46px;height:28px;border-radius:14px;background:var(--line);border:0;position:relative;flex-shrink:0;margin-left:auto}
+.switch::after{content:"";position:absolute;top:3px;left:3px;width:22px;height:22px;border-radius:11px;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.2);transition:left .2s}
+.switch[aria-checked="true"]{background:var(--sea)}.switch[aria-checked="true"]::after{left:21px}
+.pass{background:#fff;border-radius:24px;overflow:hidden}
+.num{font-variant-numeric:tabular-nums}
+.seg{display:flex;background:var(--surface);box-shadow:var(--shadow);border-radius:12px;padding:4px;gap:4px}
+.seg button{flex:1;border:0;background:transparent;border-radius:9px;height:38px;font-size:12.5px;font-weight:650;color:var(--ink2)}
+.seg button[aria-selected="true"]{background:var(--night);color:#fff}
+.scanbox{position:relative;height:200px;border-radius:18px;background:#0B1424;overflow:hidden}
+.scanbox svg{position:absolute;inset:0;width:100%;height:100%}
+.wf{stroke-dasharray:420;stroke-dashoffset:420;transition:stroke-dashoffset 2.4s linear}
+.scanning .wf,.done .wf{stroke-dashoffset:0}
+#sweep{display:none}.scanning #sweep{display:block;animation:sweep 1.2s linear infinite}
+@keyframes sweep{from{transform:translateY(0)}to{transform:translateY(197px)}}
+.scanlabel{position:absolute;left:12px;bottom:12px;right:12px;color:#fff;font-size:12.5px;font-weight:600;display:flex;justify-content:space-between;gap:8px}
+.room{transition:transform 1s cubic-bezier(.2,.8,.2,1)}
+.sg{cursor:pointer}
+.mini{border:0;border-radius:999px;padding:7px 12px;font-size:12.5px;font-weight:700;background:var(--night);color:#fff;white-space:nowrap;margin-left:auto}
+.detchip{position:absolute;left:16px;z-index:5;display:flex;align-items:center;gap:8px;background:rgba(10,26,51,.88);color:#fff;border:1.5px solid #2EA6FF;border-radius:12px;padding:8px 11px;font-size:12.5px;font-weight:600}
+.detchip i{width:10px;height:10px;border-radius:3px;background:#2EA6FF;display:block}
+.scenewrap{position:absolute;inset:0;transition:opacity .35s}.scenewrap svg{width:100%;height:100%;display:block}
+.minimap{position:absolute;right:12px;width:124px;background:rgba(255,255,255,.96);border-radius:14px;padding:8px 8px 6px;z-index:5;box-shadow:var(--float)}
+.minimap .ovl{font-size:9.5px;color:var(--sea-ink);margin-bottom:4px;letter-spacing:.06em}
+.minimap b{display:block;font-size:12.5px;margin-bottom:5px}
+.segs{display:flex;gap:4px}.segs i{flex:1;height:4px;border-radius:2px;background:var(--line);overflow:hidden;position:relative;display:block}
+.segs i.done{background:var(--sea)}
+.segs i.cur::after{content:"";position:absolute;inset:0;background:var(--sea);transform-origin:left;animation:fillseg var(--dur,6s) linear forwards}
+.paused .segs i.cur::after{animation-play-state:paused}
+@keyframes fillseg{from{transform:scaleX(0)}to{transform:scaleX(1)}}
+.det{opacity:0;animation:detin .45s .8s forwards}@keyframes detin{to{opacity:1}}
+.mmdot{transition:transform 1.2s ease-in-out}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
 </head>
 <body>
-<div id="map"></div>
 
-<header class="top">
-  <div class="card trip">
-    <div class="logo">NAPOLI <b>360</b><i>°</i></div>
-    <div class="tripmain">
-      <div class="ovl">Prossimo imbarco</div>
-      <div class="ttl">Procida · 10:40</div>
+
+<div class="stage">
+  <aside class="side">
+    <span class="tag">Prototipo navigabile</span>
+    <h1>NAPOLI <span>360</span>°</h1>
+    <p>Prova l'app come farebbe Giulia: dal Vomero all'aliscafo per Procida, con Partenope e Port Vision AI.</p>
+    <ul>
+      <li>«Guidami al molo in AR»: mappa 3D reale del Beverello, poi la guida dentro il terminal</li>
+      <li>Apri Partenope e fai una domanda</li>
+      <li>Esplora mobilità, eventi, cultura e avvisi</li>
+    </ul>
+    <p>Dati di esempio: orari, moli e avvisi sono simulati. Nessun dato è collegato a servizi reali.</p>
+  </aside>
+
+  <div class="device">
+    <div class="island" aria-hidden="true"></div>
+    <div class="screen" id="screen">
+
+      <!-- HOME -->
+      <section class="view" id="v-home" aria-label="Home">
+        <div class="pad">
+          <div class="between"><div class="logo">NAPOLI <b>360</b><i>°</i></div><button class="avatar" data-go="profilo" aria-label="Profilo">G</button></div>
+          <div>
+            <h2 class="hello">Uè, Giulia</h2>
+            <div class="cap row" style="gap:5px;margin-top:6px"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--sea)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 10c0 5-5.5 10.2-7.4 11.8a1 1 0 0 1-1.2 0C9.5 20.2 4 15 4 10a8 8 0 0 1 16 0"/><circle cx="12" cy="10" r="3"/></svg>Vomero · 22° · Lunedì 3 maggio</div>
+          </div>
+          <button class="ask" data-open="partenope"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#C98A12" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9.9 15.5A2 2 0 0 0 8.5 14l-6.1-1.6a.5.5 0 0 1 0-1L8.5 9.9A2 2 0 0 0 9.9 8.5l1.6-6.1a.5.5 0 0 1 1 0L14 8.5a2 2 0 0 0 1.5 1.4l6.1 1.6a.5.5 0 0 1 0 1L15.5 14a2 2 0 0 0-1.4 1.5l-1.6 6.1a.5.5 0 0 1-1 0z"/></svg><span>Chiedi a Partenope…</span><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--ink2)" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" x2="12" y1="19" y2="22"/></svg></button>
+          <div class="hero">
+            <div class="ovl" style="color:var(--sun)">Prossimo imbarco · Procida</div>
+            <div class="between" style="align-items:flex-end">
+              <div><div class="big" id="h-left">Mancano 25 min</div><div class="sub">Aliscafo · partenza alle 10:40</div></div>
+              <div style="text-align:right"><div style="font-size:11px;color:#B9C4D4;font-weight:600">imbarco alle</div><div class="num" style="font-size:26px;font-weight:800;letter-spacing:-.02em">10:15</div></div>
+            </div>
+            <div class="bar"><div id="h-bar" style="width:62%"></div></div>
+            <div class="row" style="gap:8px"><span class="pill" style="background:var(--sun);color:var(--night)">Molo B</span><span class="pill" style="background:rgba(255,255,255,.12)">Posto 14B</span><button class="pill" data-go="carta" style="background:transparent;border:1px solid rgba(255,255,255,.3);color:#fff;margin-left:auto">Carta d'imbarco</button></div>
+            <div class="alert dark"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#FF8A7A" stroke-width="2" stroke-linecap="round" aria-hidden="true" style="flex-shrink:0;margin-top:1px"><path d="m21.7 18-8-14a2 2 0 0 0-3.5 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.7-3"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>Cambio molo: da A a B · avviso del gestore, 9:58</div>
+            <a class="btn white" href="porto3d.html" style="text-decoration:none"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M3 7V5a2 2 0 0 1 2-2h2"/><path d="M17 3h2a2 2 0 0 1 2 2v2"/><path d="M21 17v2a2 2 0 0 1-2 2h-2"/><path d="M7 21H5a2 2 0 0 1-2-2v-2"/><path d="M7 12h10"/></svg>Guidami al molo in AR</a>
+          </div>
+          <div class="grid3">
+            <button class="tile" data-href="porto3d.html"><span class="ico" style="background:var(--night);color:var(--sun)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M12 10.2V14"/><path d="M12 2v3"/><path d="M19 13V7a2 2 0 0 0-2-2H7a2 2 0 0 0-2 2v6"/><path d="M19.4 20A11.6 11.6 0 0 0 21 14l-8.2-3.6a2 2 0 0 0-1.6 0L3 14a11.6 11.6 0 0 0 2.8 7.8"/></svg></span>Port Vision</button>
+            <button class="tile" data-go="mobilita"><span class="ico" style="background:var(--sea-soft);color:var(--sea)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><rect width="16" height="16" x="4" y="3" rx="2"/><path d="M4 11h16"/><path d="M12 3v8"/><path d="m8 19-2 3"/><path d="m18 22-2-3"/></svg></span>Mobilità</button>
+            <button class="tile" data-go="eventi"><span class="ico" style="background:var(--sun-soft);color:var(--sun-ink)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M8 2v4"/><path d="M16 2v4"/><rect width="18" height="18" x="3" y="4" rx="2"/><path d="M3 10h18"/></svg></span>Eventi</button>
+            <button class="tile" data-go="cultura"><span class="ico" style="background:#EFE6D4;color:#7A5C25"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><line x1="3" x2="21" y1="22" y2="22"/><line x1="6" x2="6" y1="18" y2="11"/><line x1="10" x2="10" y1="18" y2="11"/><line x1="14" x2="14" y1="18" y2="11"/><line x1="18" x2="18" y1="18" y2="11"/><polygon points="12 2 20 7 4 7"/></svg></span>Cultura</button>
+            <button class="tile" data-go="informa"><span class="ico" style="background:var(--coral-soft);color:var(--coral)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="m3 11 18-5v12L3 14v-3z"/><path d="M11.6 16.8a3 3 0 1 1-5.8-1.6"/></svg></span>Informa</button>
+            <button class="tile" data-go="salvati"><span class="ico" style="background:#E9EDF3;color:var(--night)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M19 14c1.5-1.5 3-3.2 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.8 0-3 .5-4.5 2-1.5-1.5-2.7-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4 3 5.5l7 7Z"/></svg></span>La mia Napoli</button>
+          </div>
+          <button class="card ev" data-go="evento"><span class="thumb" aria-hidden="true"></span><span style="flex:1"><span class="ovl" style="color:var(--sea-ink);display:block">Mar 4 maggio · 21:00</span><span style="display:block;font-size:14px;font-weight:650;margin-top:4px">Elodie · Palapartenope</span><span class="cap">Cumana fino a Edenlandia</span></span></button>
+          <div class="demo">Prototipo · dati di esempio</div>
+        </div>
+      </section>
+
+      <!-- PORT VISION AI · percorso nel Beverello -->
+      <section class="view" id="v-porto" aria-label="Port Vision AI" hidden style="padding-bottom:0;overflow:hidden">
+        <div class="ar" id="tour" style="background:#1A1F27">
+          <div class="scenewrap" id="scene" aria-hidden="true"></div>
+          <div class="arcard" style="top:calc(54px + env(safe-area-inset-top,0px))">
+            <button class="back" data-back aria-label="Indietro" style="margin-left:-8px"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg></button>
+            <div style="flex:1"><div style="font-size:15px;font-weight:700">Procida · 10:40</div><div class="cap">Port Vision AI · Molo Beverello</div></div>
+            <span class="pill" style="background:var(--ok-soft);color:var(--ok)">Imbarco aperto</span>
+          </div>
+          <div class="alert" style="position:absolute;left:16px;right:16px;top:calc(124px + env(safe-area-inset-top,0px));background:var(--night);color:#fff;z-index:5">Avviso del gestore: il molo è cambiato, ora&nbsp;<b style="color:var(--sun)">Molo B</b></div>
+          <div class="minimap" style="top:calc(172px + env(safe-area-inset-top,0px))" aria-live="polite"><div class="ovl">Sei qui</div><b id="mm-room">Biglietterie</b><div id="mm-svg"></div></div>
+          <div class="arsheet">
+            <div class="grab"></div>
+            <div class="segs" id="segs"></div>
+            <div class="between" style="align-items:flex-start"><div aria-live="polite"><div style="font-size:19px;font-weight:700;line-height:1.25" id="tour-title"></div><div class="cap" style="margin-top:4px;font-size:13px" id="tour-sub"></div></div>
+              <div class="ico" style="width:46px;height:46px;border-radius:23px;background:var(--sea-soft);color:var(--sea);flex-shrink:0" id="tour-ico"></div></div>
+            <div class="alert light" id="tour-warn" hidden></div>
+            <div class="row" style="gap:8px"><span class="pill num" id="tour-dist" style="background:var(--surface2);color:var(--night)"></span><span class="cap" id="tour-det" style="font-size:12px"></span></div>
+            <div class="row" style="gap:8px"><button class="btn soft" id="tour-a">Pausa</button><button class="btn dark" id="tour-b">Avanti</button></div>
+            <div style="font-size:11px;color:var(--ink3);line-height:1.35">La posizione si aggiorna riconoscendo gli ambienti e i cartelli del terminal. Segui sempre segnaletica e personale del porto.</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- MAPPA 2D -->
+      <section class="view" id="v-mappa" aria-label="Mappa del molo" hidden>
+        <div class="topbar"><button class="back" data-back aria-label="Indietro"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg></button><div style="flex:1"><h3>Molo Beverello</h3><div class="cap">Port Vision AI · mappa del terminal</div></div><button class="pill" data-go="porto" style="background:var(--night);color:#fff;border:0">Vista AR</button></div>
+        <svg viewBox="0 0 390 400" style="display:block;width:100%" role="img" aria-label="Mappa del Molo Beverello con percorso dalla metro al Molo B">
+          <rect width="390" height="400" fill="#EFE7D6"/><rect width="390" height="90" fill="#E5DCC8"/>
+          <text x="20" y="30" font-family="Inter,sans-serif" font-size="11" font-weight="700" fill="#5F6C80">VIA MARINA</text>
+          <rect x="30" y="56" width="90" height="34" rx="6" fill="#fff" stroke="#D5DCE5"/><text x="75" y="77" text-anchor="middle" font-family="Inter,sans-serif" font-size="10" font-weight="700" fill="#0A1A33">Metro L1</text>
+          <rect x="150" y="98" width="120" height="40" rx="8" fill="#fff" stroke="#D5DCE5"/><text x="210" y="122" text-anchor="middle" font-family="Inter,sans-serif" font-size="11" font-weight="700" fill="#0A1A33">Biglietterie</text>
+          <path d="M0 172 L390 172 L390 400 L0 400 Z" fill="#BFDDF0"/><rect y="158" width="390" height="18" fill="#E2D6BC"/>
+          <rect x="40" y="176" width="34" height="160" fill="#E9E1CF"/><rect x="160" y="176" width="34" height="190" fill="#E9E1CF" stroke="#F2B33D" stroke-width="3"/><rect x="290" y="176" width="34" height="140" fill="#E9E1CF"/>
+          <text x="57" y="356" text-anchor="middle" font-family="Inter,sans-serif" font-size="13" font-weight="800" fill="#5F6C80">A</text><text x="307" y="338" text-anchor="middle" font-family="Inter,sans-serif" font-size="13" font-weight="800" fill="#5F6C80">C</text>
+          <path d="M206 236 h70 l10 10 l-10 10 h-70 z" fill="#fff" stroke="#0A1A33" stroke-width="2"/>
+          <path id="route" d="M75 90 C80 126 150 136 170 146 L177 172 L177 250" fill="none" stroke="#0E7BC4" stroke-width="5" stroke-linecap="round" stroke-dasharray="1 10"/>
+          <circle cx="75" cy="90" r="9" fill="#0E7BC4" stroke="#fff" stroke-width="3"/><circle cx="177" cy="262" r="10" fill="#F2B33D" stroke="#0A1A33" stroke-width="3"/>
+          <rect x="196" y="276" width="104" height="24" rx="8" fill="#0A1A33"/><text x="248" y="292" text-anchor="middle" font-family="Inter,sans-serif" font-size="11" font-weight="700" fill="#fff">Molo B · imbarco</text>
+        </svg>
+        <div class="pad" style="padding-top:14px">
+          <div class="between"><div><div style="font-size:18px;font-weight:700">4 min a piedi · 300 m</div><div class="cap">Arrivo al molo alle 10:19</div></div><span class="status ok">In orario</span></div>
+          <div class="list">
+            <div class="step"><span class="n" style="background:var(--sea)">1</span><div class="t" style="font-weight:500">Esci dalla metro e attraversa Via Marina</div></div>
+            <div class="step"><span class="n" style="background:var(--sea)">2</span><div class="t" style="font-weight:500">Supera le biglietterie sulla sinistra</div></div>
+            <div class="step"><span class="n" style="background:var(--sun);color:var(--night)">3</span><div class="t">Imbarco al Molo B, varco giallo</div></div>
+          </div>
+          <div class="alert light">Il gestore ha spostato la partenza dal Molo A al Molo B (9:58)</div>
+        </div>
+      </section>
+
+      <!-- CARTA D'IMBARCO -->
+      <section class="view" id="v-carta" aria-label="Carta d'imbarco" hidden style="background:var(--night)">
+        <div class="pad" style="color:#fff">
+          <div class="between"><button class="back" data-back aria-label="Indietro" style="color:#fff;margin-left:-8px"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg></button><div style="font-weight:700">Il tuo imbarco</div><div style="width:36px"></div></div>
+          <div class="pass" style="color:var(--ink)">
+            <div style="padding:18px 20px;display:flex;flex-direction:column;gap:14px">
+              <div class="between"><span class="ovl" style="color:var(--sea-ink)">Port Vision AI</span><span class="status ok">Imbarco aperto</span></div>
+              <div class="between"><div><div style="font-size:30px;font-weight:800">NAP</div><div class="cap">Molo Beverello</div></div><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="var(--sea)" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg><div style="text-align:right"><div style="font-size:30px;font-weight:800">PRO</div><div class="cap">Procida</div></div></div>
+              <div class="grid3"><div style="background:var(--surface2);border-radius:12px;padding:10px"><div class="cap">Partenza</div><div class="num" style="font-size:18px;font-weight:800">10:40</div></div><div style="background:var(--sun);border-radius:12px;padding:10px"><div style="font-size:12.5px">Molo</div><div style="font-size:18px;font-weight:800">B</div></div><div style="background:var(--surface2);border-radius:12px;padding:10px"><div class="cap">Posto</div><div style="font-size:18px;font-weight:800">14B</div></div></div>
+            </div>
+            <div style="border-top:2px dashed #D5DCE5;margin:0 16px"></div>
+            <div style="padding:16px 20px 20px;text-align:center"><div class="cap">All'imbarco mancano</div><div class="num" id="cd" style="font-size:44px;font-weight:800;letter-spacing:-.03em">25:00</div></div>
+          </div>
+          <div style="background:#13284A;border-radius:18px;padding:14px 16px;display:flex;flex-direction:column;gap:10px">
+            <div class="ovl" style="color:var(--sun)">Aggiornamenti del gestore</div>
+            <div class="row" style="align-items:flex-start"><span class="num" style="font-size:12.5px;font-weight:700;color:#B9C4D4;width:40px">9:58</span><span style="font-size:13.5px">Partenza spostata dal <b>Molo A</b> al <b>Molo B</b></span></div>
+            <div class="row" style="align-items:flex-start"><span class="num" style="font-size:12.5px;font-weight:700;color:#B9C4D4;width:40px">9:30</span><span style="font-size:13.5px">Mare calmo, corsa confermata</span></div>
+          </div>
+          <div class="row" style="gap:10px"><button class="btn sun" data-go="porto">Guidami al molo</button><button class="btn" data-go="mappa" style="border:1.5px solid #fff;background:transparent;color:#fff">Mappa</button></div>
+        </div>
+      </section>
+
+      <!-- CHAT PARTENOPE -->
+      <section class="view" id="v-chat" aria-label="Partenope" hidden style="padding-bottom:100px">
+        <div class="topbar"><button class="back" data-back aria-label="Indietro"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg></button>
+          <span class="ico" style="width:38px;height:38px;border-radius:19px;background:var(--night);color:var(--sun)"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M2 6c.6.5 1.2 1 2.5 1C7 7 7 5 9.5 5c2.6 0 2.4 2 5 2 2.5 0 2.5-2 5-2 1.3 0 1.9.5 2.5 1"/><path d="M2 12c.6.5 1.2 1 2.5 1 2.5 0 2.5-2 5-2 2.6 0 2.4 2 5 2 2.5 0 2.5-2 5-2 1.3 0 1.9.5 2.5 1"/><path d="M2 18c.6.5 1.2 1 2.5 1 2.5 0 2.5-2 5-2 2.6 0 2.4 2 5 2 2.5 0 2.5-2 5-2 1.3 0 1.9.5 2.5 1"/></svg></span>
+          <div><h3>Partenope</h3><div class="cap">Assistente AI · risponde citando le fonti</div></div></div>
+        <div class="chat" id="chatlog" aria-live="polite"></div>
+        <form class="chatbar" id="chatform"><label for="chatinput" class="sr" style="position:absolute;left:-9999px">Scrivi una domanda</label><input id="chatinput" placeholder="Scrivi una domanda…" autocomplete="off"><button class="send" aria-label="Invia"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></svg></button></form>
+      </section>
+
+      <!-- MOBILITÀ -->
+      <section class="view" id="v-mobilita" aria-label="Mobilità" hidden>
+        <div class="topbar"><button class="back" data-back aria-label="Indietro"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg></button><div><h3>Mobilità</h3><div class="cap">Linee intorno a te · dati di esempio</div></div></div>
+        <div class="pad" style="padding-top:16px">
+          <div class="list" id="lines"></div>
+          <div class="ovl" style="color:var(--ink2);margin-top:6px">Prossime partenze · Funicolare Centrale, Fuga</div>
+          <div class="card" style="padding:4px 14px"><div class="between" style="padding:10px 0;border-bottom:1px solid var(--line)"><span>Verso Augusteo</span><b class="num">9:50</b></div><div class="between" style="padding:10px 0;border-bottom:1px solid var(--line)"><span>Verso Augusteo</span><b class="num">10:00</b></div><div class="between" style="padding:10px 0"><span>Verso Augusteo</span><b class="num">10:10</b></div></div>
+          <button class="btn dark" data-ask="procida">Chiedi a Partenope il percorso per Procida</button>
+        </div>
+      </section>
+
+      <!-- EVENTI -->
+      <section class="view" id="v-eventi" aria-label="Eventi" hidden>
+        <div class="topbar"><button class="back" data-back aria-label="Indietro"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg></button><div><h3>Eventi</h3><div class="cap">Nei prossimi giorni a Napoli</div></div></div>
+        <div class="pad" style="padding-top:16px"><div class="list" id="events"></div><div class="demo">Date tratte dai calendari pubblicati; nel prototipo non si acquistano biglietti.</div></div>
+      </section>
+
+      <!-- EVENTO DETTAGLIO -->
+      <section class="view" id="v-evento" aria-label="Dettaglio evento" hidden>
+        <div class="topbar"><button class="back" data-back aria-label="Indietro"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg></button><div><h3>Evento</h3></div></div>
+        <div style="height:170px;background:linear-gradient(180deg,#1B1240,#0A1A33);position:relative;overflow:hidden" aria-hidden="true"><div style="position:absolute;left:40px;top:0;border-left:40px solid transparent;border-right:40px solid transparent;border-top:150px solid rgba(242,179,61,.45)"></div><div style="position:absolute;right:50px;top:0;border-left:40px solid transparent;border-right:40px solid transparent;border-top:150px solid rgba(242,107,91,.4)"></div><div style="position:absolute;left:0;right:0;bottom:0;height:34px;background:#05070D"></div></div>
+        <div class="pad" style="padding-top:16px">
+          <div class="ovl" style="color:var(--sea-ink)">Martedì 4 maggio 2027 · 21:00</div>
+          <h2 class="hello" style="font-size:24px">Elodie in concerto</h2>
+          <div class="cap">Palapartenope · Via Barbagallo, Fuorigrotta</div>
+          <div class="card" style="padding:14px;display:flex;flex-direction:column;gap:10px">
+            <div class="ovl" style="color:var(--ink2)">Come arrivarci dal Vomero</div>
+            <div class="step"><span class="n" style="background:var(--sea)">1</span><div><div class="t">Funicolare di Montesanto</div><div class="d">fino a Montesanto · 6 min</div></div></div>
+            <div class="step"><span class="n" style="background:var(--sea)">2</span><div><div class="t">Cumana fino a Edenlandia</div><div class="d">circa 15 min · poi 3 min a piedi</div></div></div>
+            <div class="cap">Percorso indicativo: verifica gli orari sul sito del gestore.</div>
+          </div>
+          <div class="row" style="gap:8px"><button class="btn dark" id="saveEv">Salva in La mia Napoli</button></div>
+        </div>
+      </section>
+
+      <!-- CULTURA -->
+      <section class="view" id="v-cultura" aria-label="Cultura" hidden>
+        <div class="topbar"><button class="back" data-back aria-label="Indietro"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg></button><div><h3>Cultura</h3><div class="cap">Musei e luoghi da visitare</div></div></div>
+        <div class="pad" style="padding-top:16px"><div class="list" id="places"></div><div class="demo">Orari e biglietti si consultano sui siti ufficiali dei musei.</div></div>
+      </section>
+
+      <!-- INFORMA -->
+      <section class="view" id="v-informa" aria-label="Napoli Informa" hidden>
+        <div class="topbar"><button class="back" data-back aria-label="Indietro"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg></button><div><h3>Napoli Informa</h3><div class="cap">Avvisi su viabilità, porto e trasporti</div></div></div>
+        <div class="pad" style="padding-top:16px"><div class="list" id="alerts"></div><div class="demo">Avvisi di esempio.</div></div>
+      </section>
+
+      <!-- SALVATI -->
+      <section class="view" id="v-salvati" aria-label="La mia Napoli" hidden>
+        <div class="pad">
+          <h2 class="hello" style="font-size:24px">La mia Napoli</h2>
+          <div class="ovl" style="color:var(--ink2)">Salvati</div>
+          <div class="list" id="saved"></div>
+          <div class="ovl" style="color:var(--ink2);margin-top:6px">Notifiche</div>
+          <div class="card" style="padding:4px 14px" id="notifs"></div>
+        </div>
+      </section>
+
+      <!-- PROFILO -->
+      <section class="view" id="v-profilo" aria-label="Profilo" hidden>
+        <div class="pad">
+          <div class="row" style="gap:14px"><span class="avatar" style="width:56px;height:56px;border-radius:28px;font-size:20px">G</span><div><h2 class="hello" style="font-size:22px">Giulia</h2><div class="cap">Vomero · utente di esempio</div></div></div>
+          <div class="card" style="padding:4px 14px" id="prefs"></div>
+          <div class="card" style="padding:14px;font-size:13px;line-height:1.5;color:var(--ink2)">Questo è un prototipo navigabile di NAPOLI 360. I dati sono simulati, Partenope usa risposte preparate e la realtà aumentata è un'animazione dimostrativa.</div>
+        </div>
+      </section>
+
+      <!-- TABBAR -->
+      <nav class="tabbar" id="tabbar" aria-label="Navigazione principale">
+        <button class="tab" data-tab="home" aria-current="page"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8"/><path d="M3 10a2 2 0 0 1 .7-1.5l7-6a2 2 0 0 1 2.6 0l7 6A2 2 0 0 1 21 10v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>Home</button>
+        <button class="tab" data-tab="mappa"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M14.1 5.6a2 2 0 0 0 1.8 0l3.7-1.9A1 1 0 0 1 21 4.6v12.8a1 1 0 0 1-.6.9l-4.5 2.3a2 2 0 0 1-1.8 0l-4.2-2.1a2 2 0 0 0-1.8 0l-3.7 1.8A1 1 0 0 1 3 19.4V6.6a1 1 0 0 1 .6-.9l4.5-2.3a2 2 0 0 1 1.8 0z"/><path d="M15 5.8v15"/><path d="M9 3.2v15"/></svg>Mappa</button>
+        <button class="tab center" data-open="partenope"><span class="fab"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M2 6c.6.5 1.2 1 2.5 1C7 7 7 5 9.5 5c2.6 0 2.4 2 5 2 2.5 0 2.5-2 5-2 1.3 0 1.9.5 2.5 1"/><path d="M2 12c.6.5 1.2 1 2.5 1 2.5 0 2.5-2 5-2 2.6 0 2.4 2 5 2 2.5 0 2.5-2 5-2 1.3 0 1.9.5 2.5 1"/><path d="M2 18c.6.5 1.2 1 2.5 1 2.5 0 2.5-2 5-2 2.6 0 2.4 2 5 2 2.5 0 2.5-2 5-2 1.3 0 1.9.5 2.5 1"/></svg></span>Partenope</button>
+        <button class="tab" data-tab="salvati"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="m19 21-7-4-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16z"/></svg>Salvati</button>
+        <button class="tab" data-tab="profilo"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>Profilo</button>
+      </nav>
+
+      <!-- PARTENOPE SHEET -->
+      <div class="scrim" id="scrim" hidden></div>
+      <div class="sheet" id="sheet" role="dialog" aria-modal="true" aria-label="Chiedi a Partenope" hidden>
+        <div class="grab"></div>
+        <div class="row" style="gap:12px">
+          <span class="ico" style="width:50px;height:50px;border-radius:25px;background:var(--night);color:var(--sun)"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M2 6c.6.5 1.2 1 2.5 1C7 7 7 5 9.5 5c2.6 0 2.4 2 5 2 2.5 0 2.5-2 5-2 1.3 0 1.9.5 2.5 1"/><path d="M2 12c.6.5 1.2 1 2.5 1 2.5 0 2.5-2 5-2 2.6 0 2.4 2 5 2 2.5 0 2.5-2 5-2 1.3 0 1.9.5 2.5 1"/><path d="M2 18c.6.5 1.2 1 2.5 1 2.5 0 2.5-2 5-2 2.6 0 2.4 2 5 2 2.5 0 2.5-2 5-2 1.3 0 1.9.5 2.5 1"/></svg></span>
+          <div style="flex:1"><div style="font-size:21px;font-weight:700">Ciao, sono Partenope</div><div class="cap" style="font-size:13px">La tua guida per Napoli: scrivi, parla o scegli</div></div>
+          <button class="back" id="closeSheet" aria-label="Chiudi"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg></button>
+        </div>
+        <div class="qgrid">
+          <button class="q" data-ask="imbarco"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--night)" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M12 10.2V14"/><path d="M12 2v3"/><path d="M19 13V7a2 2 0 0 0-2-2H7a2 2 0 0 0-2 2v6"/><path d="M19.4 20A11.6 11.6 0 0 0 21 14l-8.2-3.6a2 2 0 0 0-1.6 0L3 14a11.6 11.6 0 0 0 2.8 7.8"/></svg>Dov'è il mio imbarco?</button>
+          <button class="q" data-ask="procida"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--sea)" stroke-width="2" stroke-linecap="round" aria-hidden="true"><rect width="16" height="16" x="4" y="3" rx="2"/><path d="M4 11h16"/><path d="M12 3v8"/><path d="m8 19-2 3"/><path d="m18 22-2-3"/></svg>Come arrivo a Procida dal Vomero?</button>
+          <button class="q" data-ask="weekend"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--sun-ink)" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M8 2v4"/><path d="M16 2v4"/><rect width="18" height="18" x="3" y="4" rx="2"/><path d="M3 10h18"/></svg>Cosa faccio questo weekend?</button>
+          <button class="q" data-ask="strade"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--coral)" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="m3 11 18-5v12L3 14v-3z"/><path d="M11.6 16.8a3 3 0 1 1-5.8-1.6"/></svg>Strade chiuse sul Lungomare?</button>
+        </div>
+        <div class="row" style="gap:8px;font-size:12px;color:var(--ink3)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true" style="flex-shrink:0"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>Risponde con fonti ufficiali e ti avvisa se un dato non è verificabile.</div>
+        <form class="inputrow" id="sheetform"><label for="sheetinput" style="position:absolute;left:-9999px">Chiedi a Partenope</label><input id="sheetinput" placeholder="Chiedi a Partenope…" autocomplete="off"><button type="button" class="mic" id="mic" aria-label="Parla con Partenope"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" x2="12" y1="19" y2="22"/></svg></button></form>
+      </div>
+      <div class="toast" id="toast" role="status"></div>
     </div>
-    <span class="pill ok">Imbarco aperto</span>
   </div>
-  <div class="alert">Avviso del gestore: la partenza è passata dal <b>Molo A</b> al <b>Molo B</b></div>
-</header>
+</div>
 
-<section class="sheet" id="sheet" aria-live="polite">
-  <div class="grab"></div>
-  <div class="row between">
-    <div>
-      <div class="ovl sea">Port Vision AI · percorso a piedi</div>
-      <h1 id="r-title">Calcolo il percorso…</h1>
-      <div class="sub" id="r-sub">Dati reali del Molo Beverello da OpenStreetMap</div>
-    </div>
-    <div class="badge" id="r-badge">—</div>
-  </div>
-  <div class="bar"><div id="r-bar"></div></div>
-  <ol class="steps" id="r-steps"></ol>
-  <div class="row gap">
-    <button class="btn dark" id="b-go">Avvia la guida</button>
-    <button class="btn soft" id="b-view">Vista dall'alto</button>
-  </div>
-  <label class="toggle"><input type="checkbox" id="t-ferry" checked> Mostra le rotte dei traghetti</label>
-  <p class="foot">Prototipo dimostrativo · mappa e percorso calcolati sui dati © OpenStreetMap contributors · nomi dei moli indicativi · motore 3D CesiumJS</p>
-</section>
+<script>
+(function(){
+  const $ = (s, r=document) => r.querySelector(s);
+  const $$ = (s, r=document) => Array.from(r.querySelectorAll(s));
+  const MAIN = ["home","mappa","salvati","profilo"];
+  let stack = ["home"];
+  const saved = new Set(["Aliscafo per Procida · 10:40"]);
 
-<div class="toast" id="toast" role="status"></div>
-<script src="app.js"></script>
+  function render(view){
+    $$(".view").forEach(v => v.hidden = v.id !== "v-" + view);
+    const showTabs = !["porto","carta","chat"].includes(view);
+    $("#tabbar").hidden = !showTabs;
+    $$(".tab[data-tab]").forEach(t => { if (t.dataset.tab === view) t.setAttribute("aria-current","page"); else t.removeAttribute("aria-current"); });
+    const el = $("#v-" + view); if (el) el.scrollTop = 0;
+    if (view === "salvati") renderSaved();
+    if (view === "porto") tourStart(); else tourStop();
+  }
+  function go(view){ if (stack[stack.length-1] !== view) stack.push(view); render(view); }
+  function back(){ if (stack.length > 1) stack.pop(); render(stack[stack.length-1]); }
+  function tab(view){ stack = [view]; render(view); }
+
+  function toast(msg){ const t = $("#toast"); t.textContent = msg; t.classList.add("on"); clearTimeout(t._h); t._h = setTimeout(() => t.classList.remove("on"), 2200); }
+
+  // sheet
+  function openSheet(){ $("#scrim").hidden = false; $("#sheet").hidden = false; requestAnimationFrame(() => { $("#scrim").classList.add("on"); $("#sheet").classList.add("on"); }); }
+  function closeSheet(){ $("#scrim").classList.remove("on"); $("#sheet").classList.remove("on"); setTimeout(() => { $("#scrim").hidden = true; $("#sheet").hidden = true; }, 260); }
+
+  document.addEventListener("click", e => {
+    const g = e.target.closest("[data-go]"); if (g){ e.preventDefault(); closeSheet(); go(g.dataset.go); return; }
+    const t = e.target.closest("[data-tab]"); if (t){ tab(t.dataset.tab); return; }
+    const o = e.target.closest("[data-open]"); if (o){ openSheet(); return; }
+    const b = e.target.closest("[data-back]"); if (b){ back(); return; }
+    const a = e.target.closest("[data-ask]"); if (a){ closeSheet(); ask(a.dataset.ask, a.textContent.trim()); return; }
+  });
+  $("#scrim").addEventListener("click", closeSheet);
+  $("#closeSheet").addEventListener("click", closeSheet);
+  $("#mic").addEventListener("click", () => toast("La voce arriverà nella versione completa: per ora scrivi o scegli una domanda"));
+  document.addEventListener("keydown", e => { if (e.key === "Escape" && !$("#sheet").hidden) closeSheet(); });
+
+  // ---- Partenope (risposte preparate) ----
+  const Q = {
+    procida: "Come arrivo a Procida partendo dal Vomero?",
+    imbarco: "Dov'è il mio imbarco?",
+    weekend: "Cosa faccio questo weekend?",
+    strade: "Ci sono strade chiuse sul Lungomare?",
+    musei: "Quali musei posso visitare oggi?"
+  };
+  const A = {
+    procida: `<div>Per l'aliscafo delle <b>10:40</b> ti conviene partire alle 9:50:</div>
+      <div class="list" style="gap:8px">
+        <div class="step"><span class="n" style="background:var(--sea)">1</span><div><div class="t">Funicolare Centrale</div><div class="d">Fuga → Augusteo · 6 min</div></div></div>
+        <div class="step"><span class="n" style="background:var(--ink2)">2</span><div><div class="t">A piedi al Molo Beverello</div><div class="d">circa 12 min · via Medina</div></div></div>
+        <div class="step"><span class="n" style="background:var(--night);color:var(--sun)">3</span><div><div class="t">Aliscafo per Procida · Molo B</div><div class="d">circa 40 min · arrivo 11:20</div></div></div>
+      </div>
+      <div class="src"><span>Fonte: ANM · 9:12</span><span>Fonte: orari della compagnia</span></div>
+      <div class="alert light">Non posso verificare i posti disponibili: controlla sul sito della compagnia.</div>
+      <div class="row" style="gap:8px"><button class="btn dark" data-go="mappa">Percorso al molo</button><button class="btn ghost" data-go="porto">Molo in AR</button></div>`,
+    imbarco: `<div>Il tuo aliscafo per Procida delle 10:40 parte dal <b>Molo B</b>. Il gestore lo ha spostato dal Molo A alle 9:58.</div>
+      <div class="alert light">L'imbarco apre alle 10:15: arriva qualche minuto prima.</div>
+      <div class="src"><span>Fonte: avviso del gestore · 9:58</span></div>
+      <div class="row" style="gap:8px"><button class="btn dark" data-go="porto">Guidami in AR</button><button class="btn ghost" data-go="carta">Carta d'imbarco</button></div>`,
+    weekend: `<div>Alcune idee in città:</div>
+      <div class="list" style="gap:8px">
+        <div class="step"><span class="n" style="background:var(--sun);color:var(--night)">1</span><div><div class="t">Elodie al Palapartenope</div><div class="d">martedì 4 maggio · 21:00</div></div></div>
+        <div class="step"><span class="n" style="background:var(--sea)">2</span><div><div class="t">America's Cup a Napoli</div><div class="d">regate dal 22 maggio al 19 luglio</div></div></div>
+        <div class="step"><span class="n" style="background:var(--sun);color:var(--night)">3</span><div><div class="t">Museo Archeologico Nazionale</div><div class="d">Linea 1, fermata Museo</div></div></div>
+      </div>
+      <div class="src"><span>Fonte: calendari pubblicati</span></div>
+      <button class="btn dark" data-go="eventi">Vedi tutti gli eventi</button>`,
+    strade: `<div>Oggi sul Lungomare la viabilità è modificata fino alle 20:00 per un evento.</div>
+      <div class="alert light">Avviso di esempio nel prototipo: nella versione reale arriva dalle ordinanze del Comune.</div>
+      <button class="btn dark" data-go="informa">Apri Napoli Informa</button>`,
+    musei: `<div>Vicino a te puoi visitare il Museo Archeologico Nazionale, Castel dell'Ovo e il Museo di Capodimonte.</div>
+      <div class="alert light">Non posso verificare gli orari di oggi: controlla sul sito ufficiale del museo.</div>
+      <button class="btn dark" data-go="cultura">Apri Cultura</button>`,
+    fallback: `<div>Nel prototipo rispondo solo ad alcune domande. Prova con una di queste:</div>
+      <div class="chips"><button data-ask="procida">Procida dal Vomero</button><button data-ask="imbarco">Il mio imbarco</button><button data-ask="weekend">Weekend</button><button data-ask="musei">Musei</button></div>`
+  };
+  function match(text){
+    const t = text.toLowerCase();
+    if (/procida|ischia|capri|aliscaf|traghett/.test(t) && /arriv|vado|andare|come|percorso/.test(t)) return "procida";
+    if (/imbarc|molo|beverello|porto/.test(t)) return "imbarco";
+    if (/weekend|fine settimana|evento|eventi|concert|fare/.test(t)) return "weekend";
+    if (/strad|chius|lungomare|viabilit|traffic/.test(t)) return "strade";
+    if (/muse|cultura|visitare|castel/.test(t)) return "musei";
+    if (/procida/.test(t)) return "procida";
+    return "fallback";
+  }
+  function ask(key, label){
+    if (stack[stack.length-1] !== "chat") go("chat");
+    const log = $("#chatlog");
+    const me = document.createElement("div"); me.className = "me"; me.textContent = Q[key] || label; log.appendChild(me);
+    const ty = document.createElement("div"); ty.className = "typing"; ty.innerHTML = "<i></i><i></i><i></i>"; ty.setAttribute("aria-label","Partenope sta scrivendo"); log.appendChild(ty);
+    scrollChat();
+    setTimeout(() => { ty.remove(); const b = document.createElement("div"); b.className = "bot"; b.innerHTML = A[key] || A.fallback; log.appendChild(b); scrollChat(); }, 900);
+  }
+  function askText(text){ const k = match(text); const lbl = text; if (k === "fallback"){ go("chat"); const log=$("#chatlog"); const me=document.createElement("div"); me.className="me"; me.textContent=lbl; log.appendChild(me); setTimeout(()=>{const b=document.createElement("div"); b.className="bot"; b.innerHTML=A.fallback; log.appendChild(b); scrollChat();},700); scrollChat(); } else { ask(k, lbl); } }
+  function scrollChat(){ const v = $("#v-chat"); requestAnimationFrame(() => v.scrollTop = v.scrollHeight); }
+  $("#chatform").addEventListener("submit", e => { e.preventDefault(); const v = $("#chatinput").value.trim(); if (!v) return; $("#chatinput").value = ""; askText(v); });
+  $("#sheetform").addEventListener("submit", e => { e.preventDefault(); const v = $("#sheetinput").value.trim(); if (!v) return; $("#sheetinput").value = ""; closeSheet(); askText(v); });
+
+  // ---- Port Vision AI: percorso simulato nel Molo Beverello ----
+  const ROOMS = [
+    {id:"bigl", n:"Biglietterie", x:20, y:20, w:150, h:90, c:"#E3F0FA"},
+    {id:"sala", n:"Sala d'attesa", x:170, y:20, w:160, h:90, c:"#FDF1D6"},
+    {id:"corr", n:"Corridoio imbarchi", x:20, y:110, w:310, h:60, c:"#EFE6D4"},
+    {id:"varco", n:"Varco Molo B", x:200, y:170, w:130, h:70, c:"#DDF3EA"}
+  ];
+  const STG = [
+    {room:"bigl", pt:[90,70], sign:"bigl", dir:"up", det:"Biglietteria aliscafi", dist:"300 m · 4 min",
+     title:"Sei nell'atrio delle biglietterie", sub:"Prosegui dritto verso la sala d'attesa"},
+    {room:"sala", pt:[250,70], sign:"tab", dir:"right", det:"Tabellone partenze", dist:"200 m · 3 min",
+     title:"Il tabellone conferma: Molo B", sub:"Procida 10:40 · gira a destra verso gli imbarchi"},
+    {room:"corr", pt:[250,140], sign:"bivio", dir:"right", det:"Indicazioni moli", dist:"120 m · 2 min",
+     title:"Tieni la destra, verso il Molo B", sub:"Il Molo A è a sinistra, ma oggi la tua corsa non parte da lì",
+     warn:"Il gestore ha spostato la partenza dal Molo A al Molo B alle 9:58."},
+    {room:"varco", pt:[262,200], sign:"varco", dir:"up", det:"Molo B · imbarco", dist:"30 m · 1 min",
+     title:"Varco Molo B, davanti a te", sub:"Tieni pronto il biglietto: l'imbarco è aperto"},
+    {room:"varco", pt:[290,222], sign:"arrivo", dir:"done", det:"Molo B · imbarco", dist:"Arrivata · 10:19",
+     title:"Sei arrivata al Molo B", sub:"Mostra la carta d'imbarco al personale. Buon viaggio a Procida!"}
+  ];
+  const DUR = 6000;
+  let ti = 0, tTimer = null, tStart = 0, tLeft = DUR, tPaused = false;
+  const IC = {
+    up:'<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5"/><path d="m5 12 7-7 7 7"/></svg>',
+    right:'<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 20v-6a4 4 0 0 1 4-4h7"/><path d="m16 6 4 4-4 4"/></svg>',
+    done:'<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>'
+  };
+  const WALL = {bigl:"#E3F0FA", sala:"#FDF1D6", corr:"#EFE6D4", varco:"#DDF3EA"};
+
+  function signSVG(k){
+    const T = (x,y,t,sz,col,w,anc) => `<text x="${x}" y="${y}" font-family="Inter,sans-serif" font-size="${sz}" font-weight="${w||800}" fill="${col}" text-anchor="${anc||"start"}">${t}</text>`;
+    let g = "", box = [40,215,180,56];
+    if (k === "bigl"){ g = `<rect x="40" y="215" width="180" height="56" rx="6" fill="#0A1A33"/>` + T(130,243,"BIGLIETTERIA",19,"#F2B33D",800,"middle") + T(130,261,"Aliscafi · Golfo di Napoli",11,"#fff",600,"middle"); }
+    if (k === "tab"){ box = [30,196,200,104];
+      g = `<rect x="30" y="196" width="200" height="104" rx="6" fill="#0B0F17"/>` + T(44,215,"PARTENZE",11,"#F2B33D") +
+        T(44,240,"10:20",12,"#8B95A5",700) + T(88,240,"ISCHIA",12,"#8B95A5",700) + T(216,240,"MOLO C",12,"#8B95A5",700,"end") +
+        `<rect x="36" y="249" width="188" height="22" rx="4" fill="#F2B33D"/>` + T(44,265,"10:40",12,"#0A1A33") + T(88,265,"PROCIDA",12,"#0A1A33") + T(216,265,"MOLO B",12,"#0A1A33",800,"end") +
+        T(44,290,"11:00",12,"#8B95A5",700) + T(88,290,"CAPRI",12,"#8B95A5",700) + T(216,290,"MOLO A",12,"#8B95A5",700,"end"); }
+    if (k === "bivio"){ box = [30,215,200,56];
+      g = `<rect x="30" y="215" width="200" height="56" rx="6" fill="#0A1A33"/><line x1="130" y1="223" x2="130" y2="263" stroke="#2A3B57" stroke-width="2"/>` + T(80,249,"← MOLO A",15,"#6F7C90",800,"middle") + T(180,249,"MOLO B →",15,"#F2B33D",800,"middle"); }
+    if (k === "varco" || k === "arrivo"){ g = `<rect x="40" y="215" width="180" height="56" rx="6" fill="#13704C"/>` + T(130,243,"MOLO B · IMBARCO",17,"#fff",800,"middle") + T(130,261,"Procida · varco giallo",11,"#D5F2E5",600,"middle"); }
+    const [x,y,w,h] = box, hang = `<g stroke="#8D96A3" stroke-width="2"><line x1="${x+30}" y1="${y-60}" x2="${x+30}" y2="${y}"/><line x1="${x+w-30}" y1="${y-60}" x2="${x+w-30}" y2="${y}"/></g>`;
+    const c = 14, det = `<g class="det" fill="none" stroke="#2EA6FF" stroke-width="3" stroke-linecap="round">
+      <rect x="${x-7}" y="${y-7}" width="${w+14}" height="${h+14}" rx="8" fill="rgba(46,166,255,.14)" stroke-width="1.5"/>
+      <path d="M${x-7} ${y-7+c} V${y-7} H${x-7+c}"/><path d="M${x+w+7-c} ${y-7} H${x+w+7} V${y-7+c}"/><path d="M${x-7} ${y+h+7-c} V${y+h+7} H${x-7+c}"/><path d="M${x+w+7-c} ${y+h+7} H${x+w+7} V${y+h+7-c}"/>
+      <rect x="${x-7}" y="${y+h+14}" width="150" height="24" rx="12" fill="#2EA6FF" stroke="none"/>
+      <text x="${x+68}" y="${y+h+30}" text-anchor="middle" font-family="Inter,sans-serif" font-size="11" font-weight="700" fill="#fff" stroke="none">✓ Cartello riconosciuto</text></g>`;
+    return hang + g + det;
+  }
+  function chevrons(dir){
+    if (dir === "done") return `<g transform="translate(195 465)"><circle r="40" fill="#13704C" opacity=".92"/><path d="M-16 1 L-5 12 L17 -11" fill="none" stroke="#fff" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/></g>`;
+    const ups = [[540,10,.8],[505,8.5,.6],[474,7,.4]].map(([y,w,d]) => `<path class="chev" style="animation-delay:${d}s" d="M${195-30*w/10} ${y} L195 ${y-20*w/10} L${195+30*w/10} ${y}" stroke-width="${w}"/>`).join("");
+    if (dir === "up") return `<g fill="none" stroke="#F2B33D" stroke-linecap="round" stroke-linejoin="round">${ups}<path class="chev" style="animation-delay:.2s" d="M180 452 L195 441 L210 452" stroke-width="5.5"/><path class="chev" style="animation-delay:0s" d="M185 434 L195 427 L205 434" stroke-width="4.5"/></g>`;
+    const rights = [[225,446,.2],[250,440,0]].map(([x,y,d]) => `<path class="chev" style="animation-delay:${d}s" d="M${x} ${y-14} L${x+16} ${y} L${x} ${y+14}" stroke-width="6"/>`).join("");
+    return `<g fill="none" stroke="#F2B33D" stroke-linecap="round" stroke-linejoin="round">${ups}${rights}</g>`;
+  }
+  function sceneSVG(st){
+    const wall = WALL[st.room];
+    let extra = "";
+    if (st.room === "bigl") extra = `<g fill="#B8C4D2"><polygon points="12,390 60,405 60,470 12,492"/><polygon points="72,409 108,420 108,462 72,476"/></g><g fill="#F2B33D"><rect x="22" y="400" width="26" height="6"/><rect x="78" y="416" width="22" height="5"/></g>`;
+    if (st.room === "sala") extra = `<g fill="#3E4A5C"><rect x="20" y="560" width="90" height="26" rx="6"/><rect x="40" y="520" width="70" height="20" rx="5"/><rect x="280" y="560" width="90" height="26" rx="6"/><rect x="280" y="520" width="70" height="20" rx="5"/></g>`;
+    if (st.room === "corr") extra = `<rect x="150" y="360" width="90" height="26" rx="4" fill="#0A1A33"/><text x="195" y="378" text-anchor="middle" font-family="Inter,sans-serif" font-size="11" font-weight="800" fill="#F2B33D">IMBARCHI →</text>`;
+    if (st.room === "varco") extra = `<rect x="155" y="350" width="80" height="100" fill="#4F9BD0"/><rect x="155" y="350" width="80" height="40" fill="#A9D2EE"/><path d="M165 410 H225 L218 424 H172 Z" fill="#fff"/><rect x="176" y="400" width="34" height="10" fill="#F4F5F6"/><rect x="150" y="345" width="90" height="105" fill="none" stroke="#F2B33D" stroke-width="6"/>`;
+    const fy = [520,600,720].map(y => { const lx = 135*(844-y)/394, rx = 390-lx; return `<line x1="${lx.toFixed(0)}" y1="${y}" x2="${rx.toFixed(0)}" y2="${y}"/>`; }).join("");
+    return `<svg viewBox="0 0 390 844" preserveAspectRatio="xMidYMid slice">
+      <polygon points="0,0 390,0 255,330 135,330" fill="#EEF1F4"/>
+      <line x1="195" y1="0" x2="195" y2="330" stroke="#fff" stroke-width="12" opacity=".9"/>
+      <polygon points="0,0 135,330 135,450 0,844" fill="#DCE2E9"/>
+      <polygon points="390,0 255,330 255,450 390,844" fill="#CFD7E1"/>
+      <polygon points="0,844 135,450 255,450 390,844" fill="#C8C0B1"/>
+      <g stroke="#B3AB9C" stroke-width="1.5">${fy}<line x1="195" y1="450" x2="195" y2="844"/><line x1="165" y1="450" x2="60" y2="844"/><line x1="225" y1="450" x2="330" y2="844"/></g>
+      <rect x="135" y="330" width="120" height="120" fill="${wall}"/>
+      ${extra}
+      <g fill="#3A4150"><circle cx="330" cy="455" r="11"/><rect x="316" y="468" width="28" height="74" rx="12"/><circle cx="62" cy="520" r="9"/><rect x="51" y="530" width="22" height="58" rx="10"/></g>
+      ${chevrons(st.dir)}
+      ${signSVG(st.sign)}
+    </svg>`;
+  }
+  function miniSVG(st){
+    let s = `<svg viewBox="0 0 350 260" style="display:block;width:100%" role="img" aria-label="Piantina del terminal con la tua posizione">`;
+    ROOMS.forEach(r => s += `<rect x="${r.x}" y="${r.y}" width="${r.w}" height="${r.h}" fill="${r.c}" stroke="${r.id === st.room ? "#0E7BC4" : "#0A1A33"}" stroke-width="${r.id === st.room ? 6 : 2}"/>`);
+    s += `<path d="M90 70 L250 70 L250 140 L262 200 L290 222" fill="none" stroke="#0E7BC4" stroke-width="7" stroke-dasharray="3 12" stroke-linecap="round"/>`;
+    s += `<rect x="276" y="236" width="30" height="16" rx="4" fill="#13704C"/>`;
+    s += `<g class="mmdot" id="mmdot" style="transform:translate(${st.pt[0]}px,${st.pt[1]}px)"><circle r="22" fill="rgba(14,123,196,.25)"/><circle r="12" fill="#0E7BC4" stroke="#fff" stroke-width="5"/></g>`;
+    return s + `</svg>`;
+  }
+  function showStage(i, first){
+    ti = i; const st = STG[i];
+    const sc = $("#scene"); sc.style.opacity = 0;
+    setTimeout(() => { sc.innerHTML = sceneSVG(st); sc.style.opacity = 1; }, first ? 0 : 300);
+    if (first || !$("#mmdot")) $("#mm-svg").innerHTML = miniSVG(st);
+    else { $("#mmdot").style.transform = `translate(${st.pt[0]}px,${st.pt[1]}px)`; setTimeout(() => { if (ti === i) $("#mm-svg").innerHTML = miniSVG(st); }, 1250); }
+    $("#mm-room").textContent = ROOMS.find(r => r.id === st.room).n;
+    $("#tour-title").textContent = st.title; $("#tour-sub").textContent = st.sub;
+    $("#tour-ico").innerHTML = IC[st.dir];
+    $("#tour-ico").style.background = st.dir === "done" ? "var(--ok-soft)" : "var(--sea-soft)"; $("#tour-ico").style.color = st.dir === "done" ? "var(--ok)" : "var(--sea)";
+    $("#tour-dist").textContent = st.dist; $("#tour-det").textContent = "Riconosciuto: " + st.det;
+    const w = $("#tour-warn"); w.hidden = !st.warn; w.textContent = st.warn || "";
+    const last = i === STG.length - 1;
+    $("#segs").innerHTML = STG.map((_, k) => `<i class="${k < i || (last && k === i) ? "done" : k === i ? "cur" : ""}"></i>`).join("");
+    $("#segs").style.setProperty("--dur", DUR + "ms");
+    $("#tour-a").textContent = last ? "Rivedi il percorso" : (tPaused ? "Riprendi" : "Pausa");
+    $("#tour-b").textContent = last ? "Carta d'imbarco" : "Avanti";
+    clearTimeout(tTimer); tLeft = DUR;
+    if (!last && !tPaused){ tStart = Date.now(); tTimer = setTimeout(() => showStage(i + 1), DUR); }
+  }
+  function tourStart(){ tPaused = false; $("#tour").classList.remove("paused"); showStage(0, true); }
+  function tourStop(){ clearTimeout(tTimer); }
+  $("#tour-a").addEventListener("click", () => {
+    if (ti === STG.length - 1){ tourStart(); return; }
+    tPaused = !tPaused; $("#tour").classList.toggle("paused", tPaused);
+    if (tPaused){ clearTimeout(tTimer); tLeft -= Date.now() - tStart; $("#tour-a").textContent = "Riprendi"; }
+    else { tStart = Date.now(); tTimer = setTimeout(() => showStage(ti + 1), Math.max(300, tLeft)); $("#tour-a").textContent = "Pausa"; }
+  });
+  $("#tour-b").addEventListener("click", () => {
+    if (ti === STG.length - 1){ go("carta"); return; }
+    tPaused = false; $("#tour").classList.remove("paused"); showStage(ti + 1);
+  });
+
+  // ---- conto alla rovescia (simulato) ----
+  let secs = 25 * 60;
+  setInterval(() => { secs = Math.max(0, secs - 1); const m = Math.floor(secs / 60), s = secs % 60;
+    $("#cd").textContent = String(m).padStart(2,"0") + ":" + String(s).padStart(2,"0");
+    $("#h-left").textContent = "Mancano " + Math.max(1, Math.ceil(secs / 60)) + " min";
+    $("#h-bar").style.width = (62 + (1 - secs / 1500) * 38).toFixed(1) + "%"; }, 1000);
+
+  // ---- liste ----
+  const lines = [["Linea 1 · Metro","Piscinola ↔ Centro Direzionale","Regolare","ok","var(--sea)"],["Funicolare Centrale","Fuga ↔ Augusteo","Regolare","ok","var(--sea)"],["Linea 2 · Trenitalia","Pozzuoli ↔ Gianturco","Ritardi 10 min","warn","#5B6B80"],["Cumana · EAV","Montesanto ↔ Torregaveta","Regolare","ok","#2F7D5B"]];
+  $("#lines").innerHTML = lines.map(([t,d,s,c,col]) => `<div class="item"><span class="ico" style="background:${col};color:#fff;font-weight:800;font-size:13px">${t[0] === "L" ? t.split(" ")[1] : t[0]}</span><div style="min-width:0"><div class="t">${t}</div><div class="d">${d}</div></div><span class="status ${c}">${s}</span></div>`).join("");
+  const events = [["Mar 4 maggio · 21:00","Elodie","Palapartenope · Fuorigrotta",true],["22 maggio – 19 luglio","America's Cup","Regate nel golfo di Napoli",false]];
+  $("#events").innerHTML = events.map(([d,t,p,link]) => `<button class="item" ${link ? 'data-go="evento"' : 'data-toast="1"'}><span class="thumb" aria-hidden="true"></span><div style="min-width:0"><div class="ovl" style="color:var(--sea-ink)">${d}</div><div class="t" style="margin-top:3px">${t}</div><div class="d">${p}</div></div></button>`).join("");
+  $$("#events [data-toast]").forEach(b => b.addEventListener("click", () => toast("Nel prototipo è disponibile solo il dettaglio del concerto di Elodie")));
+  const places = [["Museo Archeologico Nazionale","Reperti di Pompei ed Ercolano · Linea 1, Museo"],["Castel dell'Ovo","Sul Lungomare, isolotto di Megaride"],["Museo e Real Bosco di Capodimonte","Collezioni d'arte e parco"],["Cappella Sansevero","Centro storico · il Cristo velato"]];
+  $("#places").innerHTML = places.map(([t,d]) => `<div class="item"><span class="ico" style="background:#EFE6D4;color:#7A5C25"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><line x1="3" x2="21" y1="22" y2="22"/><line x1="6" x2="6" y1="18" y2="11"/><line x1="10" x2="10" y1="18" y2="11"/><line x1="14" x2="14" y1="18" y2="11"/><line x1="18" x2="18" y1="18" y2="11"/><polygon points="12 2 20 7 4 7"/></svg></span><div style="min-width:0"><div class="t">${t}</div><div class="d">${d}</div></div></div>`).join("");
+  const alerts = [["Porto","Molo Beverello: partenza per Procida spostata al Molo B","9:58","bad"],["Viabilità","Lungomare: viabilità modificata fino alle 20:00","8:30","warn"],["Trasporti","Linea 2: ritardi fino a 10 minuti","8:10","warn"]];
+  $("#alerts").innerHTML = alerts.map(([c,t,h,s]) => `<div class="item" style="align-items:flex-start"><div style="min-width:0;flex:1"><div class="row" style="gap:8px"><span class="status ${s}" style="margin-left:0">${c}</span><span class="cap num">${h}</span></div><div class="t" style="margin-top:6px">${t}</div></div></div>`).join("");
+  function renderSaved(){ $("#saved").innerHTML = Array.from(saved).map(t => `<div class="item"><span class="ico" style="background:var(--sun-soft);color:var(--sun-ink)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="m19 21-7-4-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16z"/></svg></span><div class="t">${t}</div></div>`).join(""); }
+  $("#saveEv").addEventListener("click", () => { saved.add("Elodie · Palapartenope · 4 maggio"); $("#saveEv").textContent = "Salvato in La mia Napoli"; toast("Evento salvato in La mia Napoli"); });
+  function switches(el, rows){ el.innerHTML = rows.map(([id,t,on],i) => `<div class="between" style="padding:12px 0;${i < rows.length-1 ? 'border-bottom:1px solid var(--line)' : ''}"><label for="${id}" style="font-size:14px">${t}</label><button class="switch" id="${id}" role="switch" aria-checked="${on}"></button></div>`).join(""); }
+  switches($("#notifs"), [["n1","Cambi di molo e ritardi",true],["n2","Eventi salvati",true],["n3","Avvisi di viabilità",false]]);
+  switches($("#prefs"), [["p1","Usa la mia posizione (con consenso)",true],["p2","Lingua: italiano",true],["p3","Accessibilità: testo grande",false]]);
+  document.addEventListener("click", e => { const s = e.target.closest(".switch"); if (s) s.setAttribute("aria-checked", s.getAttribute("aria-checked") !== "true"); });
+
+  document.addEventListener("click", e => { const h = e.target.closest("[data-href]"); if (h) location.href = h.dataset.href; });
+  render("home");
+  if (location.hash === "#porto") go("porto");
+})();
+</script>
+
 </body>
 </html>

@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>NAPOLI 360 · Port Vision AI · Molo Beverello 3D</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/cesium@1.123.0/Build/Cesium/Widgets/widgets.css">
+<link rel="stylesheet" href="porto3d.css">
+<script src="config.js"></script>
+<script>window.CESIUM_BASE_URL = window.N360.cesium;</script>
+<script src="https://cdn.jsdelivr.net/npm/cesium@1.123.0/Build/Cesium/Cesium.js"></script>
+</head>
+<body>
+<div class="stage">
+  <aside class="side">
+    <span class="tag">Port Vision AI · dati reali</span>
+    <h2>Molo Beverello in 3D</h2>
+    <p>Mappa 3D costruita con i dati di OpenStreetMap: edifici, Stazione marittima, pontili e camminamenti reali. Il percorso dalla metro al molo è calcolato da un motore di routing pedonale.</p>
+    <p class="small">Trascina per ruotare la vista, usa due dita o la rotella per lo zoom.</p>
+  </aside>
+  <div class="device">
+    <div class="screen" id="screen">
+      <div id="map"></div>
+
+      <header class="top">
+        <div class="bar">
+          <a class="back" href="index.html" aria-label="Torna alla home"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg></a>
+          <div class="ttl"><b>Port Vision AI</b><span>Molo Beverello · Procida 10:40</span></div>
+          <span class="pill">Imbarco aperto</span>
+        </div>
+        <div class="alert">Il gestore ha spostato la partenza: ora <b>Molo B</b></div>
+      </header>
+
+      <div class="legend" aria-hidden="true"><span><i class="dot"></i>Tu</span><span><i class="line"></i>Percorso</span><span><i class="pin"></i>Molo B</span></div>
+
+      <section class="sheet" id="sheet" aria-live="polite">
+        <div class="grab"></div>
+        <div class="head">
+          <div class="dir" id="r-ico"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5"/><path d="m5 12 7-7 7 7"/></svg></div>
+          <div class="txt"><div class="now" id="r-now">Calcolo il percorso…</div><div class="sub" id="r-sub">Dati reali da OpenStreetMap</div></div>
+          <div class="badge" id="r-badge">—</div>
+        </div>
+        <div class="prog"><div id="r-bar"></div></div>
+        <div class="btns">
+          <button class="btn dark" id="b-go">Avvia la guida</button>
+          <button class="btn soft" id="b-view" aria-label="Vista d'insieme">Vista d'insieme</button>
+        </div>
+        <details class="more"><summary>Tutte le indicazioni</summary><ol class="steps" id="r-steps"></ol></details>
+        <a class="btn sun" id="b-in" href="index.html#porto" hidden>Entra nel terminal · guida AR</a>
+        <p class="foot">Prototipo · mappa © OpenStreetMap contributors © CARTO · 3D CesiumJS · Molo B = pontile 9 (indicativo)</p>
+      </section>
+      <div class="toast" id="toast" role="status"></div>
+    </div>
+  </div>
+</div>
+<script src="porto3d.js"></script>
+</body>
+</html>
