@@ -30,11 +30,18 @@
   let TR;
   try { TR = await (await fetch("data/transit.json", { cache: "no-cache" })).json(); }
   catch (e) { $("#r-now").textContent = "Orari non disponibili"; $("#r-sub").textContent = "Riprova tra qualche minuto."; return; }
+  // bus, filobus e tram (oggi e domani): si aggiungono se disponibili
+  try { const B = await (await fetch("data/bus.json", { cache: "no-cache" })).json();
+    Object.assign(TR.routes, B.routes); Object.assign(TR.stops, B.stops); Object.assign(TR.services, B.services); TR.patterns = TR.patterns.concat(B.patterns); TR.hasBus = true;
+  } catch (e) { TR.hasBus = false; }
   const SID = Object.keys(TR.stops), SI = new Map(SID.map((s, i) => [s, i]));
   const SP = SID.map((s) => [TR.stops[s].lon, TR.stops[s].lat]);
   // trasbordi a piedi tra fermate vicine (es. Municipio L1 ↔ L6, Garibaldi L1 ↔ Piazza Garibaldi L2)
   const FOOT = SP.map(() => []);
-  for (let i = 0; i < SP.length; i++) for (let j = 0; j < SP.length; j++) if (i !== j) { const d = dist(SP[i], SP[j]); if (d < 450) FOOT[i].push([j, Math.max(120, walkSec(SP[i], SP[j]) + 60)]); }
+  { const G = new Map(), cell = (ll) => Math.floor(ll[0] / 0.006) + ":" + Math.floor(ll[1] / 0.0045);
+    SP.forEach((ll, i) => { const k = cell(ll); if (!G.has(k)) G.set(k, []); G.get(k).push(i); });
+    SP.forEach((ll, i) => { const cx = Math.floor(ll[0] / 0.006), cy = Math.floor(ll[1] / 0.0045);
+      for (let dx = -1; dx <= 1; dx++) for (let dy = -1; dy <= 1; dy++) for (const j of G.get((cx + dx) + ":" + (cy + dy)) || []) if (i !== j) { const d = dist(ll, SP[j]); if (d < 450) FOOT[i].push([j, Math.max(120, walkSec(ll, SP[j]) + 60)]); } }); }
 
   function connections(date, from, to) {
     const out = [];
@@ -65,7 +72,7 @@
       }
     }
     let best = { t: opt.hill ? Infinity : now + walkSec(orig, dest), s: -1 };
-    for (let i = 0; i < N; i++) if (T[i] < Infinity && prev[i].k !== "o" && walkSec(SP[i], dest) < maxEgress && (!opt.egress || opt.egress.includes(TR.stops[SID[i]].n))) { const t = T[i] + walkSec(SP[i], dest); if (t < best.t) best = { t, s: i }; }
+    for (let i = 0; i < N; i++) if (T[i] < Infinity && prev[i].k !== "o" && walkSec(SP[i], dest) < maxEgress && (!opt.egress || opt.egress.includes(TR.stops[SID[i]].n))) { const t = T[i] + walkSec(SP[i], dest); if (t + 150 * RC[i] < best.t + 150 * (best.rc || 0)) best = { t, s: i, rc: RC[i] }; }
     if (best.t === Infinity) best = { t: now + walkSec(orig, dest), s: -1 };
     if (best.s < 0) return { arrive: best.t, legs: [{ k: "walk", a: orig, b: dest, dep: now, arr: best.t, to: "dest" }] };
     const legs = []; let s = best.s;
@@ -110,7 +117,15 @@
   const destPt = [DEST.lon, DEST.lat];
   let path = [], pathCum = [], legMarks = [], JOURNEY = null, DATE = "";
   const routeOf = (leg) => TR.routes[TR.patterns[leg.pi].r];
-  const colorOf = (r) => "#" + (r.c && r.c.length === 6 ? r.c : "0E7BC4");
+  const EAVN = { "1": "Circumvesuviana", "1.": "Circumvesuviana", "4": "Circumvesuviana", "6": "Circumvesuviana", "8": "Circumvesuviana", "2": "Piscinola–Aversa", "5": "Circumflegrea", "5.": "Circumflegrea", "7": "Napoli–Piedimonte", "9": "Cumana", "9.": "Cumana" };
+  const EAVC = { Cumana: "8E44AD", Circumflegrea: "16A085", Circumvesuviana: "C0392B", "Piscinola–Aversa": "7F8C8D", "Napoli–Piedimonte": "7F8C8D" };
+  function lineInfo(r) {
+    if (r.a === "EAV" && r.type === "2") { const n = EAVN[r.s] || "Treno EAV"; return { kind: "Treno", name: n, badge: n === "Cumana" ? "CU" : n === "Circumflegrea" ? "CF" : n === "Circumvesuviana" ? "CV" : "EAV", c: "#" + (EAVC[n] || "7F8C8D") }; }
+    const kind = r.type === "7" ? "Funicolare" : r.type === "1" ? "Metro" : r.type === "11" ? "Filobus" : r.type === "0" ? "Tram" : r.type === "3" ? "Bus" : "Treno";
+    const c = r.c && r.c.length === 6 ? "#" + r.c : kind === "Bus" ? "#E67E22" : kind === "Filobus" ? "#D35400" : kind === "Tram" ? "#A04000" : "#0E7BC4";
+    return { kind, name: kind + " " + r.s, badge: r.s, c };
+  }
+  const colorOf = (r) => lineInfo(r).c;
   function compute() {
     viewer.entities.removeAll(); path = []; legMarks = [];
     const O = OR[fromKey], orig = [O.lon, O.lat];
@@ -133,14 +148,14 @@
         const txt = L.to === "dest" ? `A piedi fino a ${DEST.n}` : L.transfer ? `Cambio a piedi a ${nice(TR.stops[SID[L.toStop]].n)}` : `A piedi fino alla fermata ${nice(TR.stops[SID[L.toStop]].n)}`;
         html.push(`<li class="leg" data-l="${li}"><span class="b w">🚶</span><div><div class="t">${txt}</div><div class="d">circa ${mins} min · ${m} m</div></div></li>`);
       } else {
-        const p = TR.patterns[L.pi], r = routeOf(L), c = colorOf(r), i0 = p.s.indexOf(SID[L.from]), i1 = p.s.indexOf(SID[L.to]);
+        const p = TR.patterns[L.pi], r = routeOf(L), LI = lineInfo(r), c = LI.c, i0 = p.s.indexOf(SID[L.from]), i1 = p.s.indexOf(SID[L.to]);
+        const dark = r.s === "L1";
         pts = p.s.slice(i0, i1 + 1).map((s) => SP[SI.get(s)]); line(pts, c, 10, false);
         const a = nice(TR.stops[SID[L.from]].n), b = nice(TR.stops[SID[L.to]].n), head = nice(p.h || TR.stops[p.s[p.s.length - 1]].n);
-        tag(SP[L.from], `Sali · ${a} · ${r.s}`, c, r.s === "L1" ? "#0A1A33" : "#FFFFFF");
-        tag(SP[L.to], `Scendi · ${b}`, c, r.s === "L1" ? "#0A1A33" : "#FFFFFF");
+        tag(SP[L.from], `Sali · ${a} · ${LI.badge}`, c, dark ? "#0A1A33" : "#FFFFFF");
+        tag(SP[L.to], `Scendi · ${b}`, c, dark ? "#0A1A33" : "#FFFFFF");
         const nx = nextDeps(L, DATE).map(hhmm).join(" · ");
-        const kind = r.type === "7" ? "Funicolare" : "Metro";
-        html.push(`<li class="leg" data-l="${li}"><span class="b" style="background:${c};color:${r.s === "L1" ? "#0A1A33" : "#fff"}">${r.s}</span><div><div class="t">${kind} ${r.s} da ${a} a ${b}</div><div class="d">direzione ${head} · ${i1 - i0} fermate · ${hhmm(L.dep)} → ${hhmm(L.arr)}</div><div class="nx">Partenze da ${a}: ${nx}</div></div></li>`);
+        html.push(`<li class="leg" data-l="${li}"><span class="b" style="background:${c};color:${dark ? "#0A1A33" : "#fff"}">${LI.badge}</span><div><div class="t">${LI.kind === "Treno" ? LI.name : LI.name} da ${a} a ${b}</div><div class="d">direzione ${head} · ${i1 - i0} fermate · ${hhmm(L.dep)} → ${hhmm(L.arr)}</div><div class="nx">Partenze da ${a}: ${nx}</div></div></li>`);
       }
       const start = path.length; path.push(...(start ? pts.slice(1) : pts)); legMarks.push(start);
     });
@@ -151,7 +166,7 @@
     $("#r-now").textContent = `Arrivo alle ${hhmm(J.arrive)}`;
     $("#r-sub").textContent = `Da ${O.n} · partenza ${hhmm(J.legs[0].dep)}${note}`;
     $("#r-badge").textContent = `${dur} min`;
-    $("#foot").textContent = `Orari programmati ANM (GTFS ufficiale, aggiornato il ${TR.generated.slice(8, 10)}/${TR.generated.slice(5, 7)}) · non includono scioperi o ritardi in tempo reale: verifica su anm.it · mappa © OpenStreetMap contributors · 3D CesiumJS`;
+    $("#foot").textContent = `Orari programmati ANM ed EAV (GTFS ufficiali; EAV con licenza IODL 2.0), aggiornati il ${TR.generated.slice(8, 10)}/${TR.generated.slice(5, 7)}${TR.hasBus ? "" : " · bus non disponibili"} · non includono scioperi o ritardi: verifica su anm.it ed eavsrl.it · mappa © OpenStreetMap contributors · 3D CesiumJS`;
     overview(0);
   }
   function overview(dur = 1.4) {
