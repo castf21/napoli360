@@ -2,16 +2,10 @@
 import json, os, time, urllib.parse, urllib.request
 BB = "40.815,14.170,40.875,14.290"
 Q = f"""
-[out:json][timeout:90];
+[out:json][timeout:120];
 (
-  nwr["tourism"~"^(museum|attraction|gallery)$"]["name"]({BB});
-  nwr["historic"~"^(castle|palace|monument|church)$"]["name"]({BB});
-  nwr["amenity"~"^(theatre|place_of_worship|ferry_terminal)$"]["name"]({BB});
-  nwr["leisure"~"^(stadium|sports_centre|park)$"]["name"]({BB});
-  nwr["building"~"^(stadium|cathedral)$"]["name"]({BB});
-  node["railway"~"^(station|subway_entrance)$"]["name"]({BB});
-  nwr["place"="square"]["name"]({BB});
-  nwr["highway"="pedestrian"]["name"~"Rotonda|Caracciolo|Gregorio"]({BB});
+  nwr["name"~"Archeologico Nazionale|Capodimonte|Sansevero|Palazzo Reale|Teatro di San Carlo|Castel Nuovo|Maschio Angioino|Castel dell.Ovo|Certosa di San Martino|Piazza del Plebiscito|Palapartenope|Maradona|Rotonda Diaz|Galleria Umberto|Gregorio Armeno|Arena Flegrea|Duomo di Napoli|Cattedrale di Santa Maria Assunta|Castel Sant.Elmo|Napoli Sotterranea|Villa Comunale"]({BB});
+  node["railway"="station"]["name"~"^(Municipio|Toledo|Garibaldi|Montesanto|Mergellina|Museo|Dante|Edenlandia|Mostra|Napoli Centrale)$"]({BB});
 );
 out tags center;
 """
@@ -22,8 +16,10 @@ def main():
         try:
             req = urllib.request.Request(s, data=body, headers={"User-Agent": "napoli360-prototipo"})
             with urllib.request.urlopen(req, timeout=150) as r: d = json.load(r); break
-        except Exception as e: print("errore", s, e); time.sleep(5)
-    else: raise SystemExit("Overpass non raggiungibile")
+        except Exception as e:
+            print("errore", s, e); os.makedirs("data", exist_ok=True); open("data/poi_error.txt", "a").write(f"{s}: {e}\n"); time.sleep(5)
+    else:
+        os.makedirs("data", exist_ok=True); open("data/poi_error.txt", "w").write("Overpass non raggiungibile"); raise SystemExit(1)
     out = []
     for el in d["elements"]:
         t = el.get("tags", {}); c = el.get("center") or {"lat": el.get("lat"), "lon": el.get("lon")}
