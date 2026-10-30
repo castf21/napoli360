@@ -33,7 +33,8 @@
         <div class="alert">Il gestore ha spostato la partenza: ora <b>Molo B</b></div>
       </header>
 
-      <div class="legend" aria-hidden="true"><span><i class="dot"></i>Tu</span><span><i class="line"></i>Percorso</span><span><i class="pin"></i>Molo B</span></div>
+      <div class="legend" aria-hidden="true"><span><i class="dot"></i>Tu</span><span><i class="line"></i>Percorso</span><span><i class="pin"></i>Molo B</span><span id="lg-sign" hidden><i class="sign"></i>Cartello</span></div>
+      <div class="modechip" id="modechip">Esterno · dalla metro al terminal</div>
 
       <section class="sheet" id="sheet" aria-live="polite">
         <div class="grab"></div>
@@ -43,37 +44,19 @@
           <div class="badge" id="r-badge">—</div>
         </div>
         <div class="prog"><div id="r-bar"></div></div>
-        <button class="btn sun" id="b-live"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/><circle cx="12" cy="13" r="3"/></svg>Vista dal vivo con la fotocamera</button>
         <div class="btns">
           <button class="btn dark" id="b-go">Simula il percorso</button>
           <button class="btn soft" id="b-view">Vista d'insieme</button>
         </div>
-        <label class="tgl"><input type="checkbox" id="t-bld" checked> Mostra i volumi degli edifici</label>
         <details class="more"><summary>Tutte le indicazioni</summary><ol class="steps" id="r-steps"></ol></details>
-        <a class="btn sun" id="b-in" href="index.html#porto" hidden>Entra nel terminal · guida AR</a>
-        <p class="foot">Prototipo · immagini © Esri, Maxar, Earthstar Geographics · dati © OpenStreetMap contributors · 3D CesiumJS · Molo B = pontile 9 (indicativo)</p>
+        <button class="btn sun" id="b-in" hidden>Entra nel terminal</button>
+        <p class="foot">Prototipo · immagini © Esri, Maxar, Earthstar Geographics · dati © OpenStreetMap contributors · 3D CesiumJS · Molo B = pontile 9 · pianta interna indicativa</p>
       </section>
       <div class="toast" id="toast" role="status"></div>
 
-      <!-- VISTA DAL VIVO (fotocamera + bussola + GPS) -->
-      <section class="live" id="live" hidden aria-label="Vista dal vivo">
-        <video id="cam" playsinline muted autoplay></video>
-        <div class="camfallback" id="camfb"></div>
-        <div class="ltop">
-          <button class="lclose" id="l-close" aria-label="Chiudi la vista dal vivo"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg></button>
-          <div class="lmode" id="l-mode">Avvio della fotocamera…</div>
-        </div>
-        <div class="floor" aria-hidden="true"><div class="plane" id="plane"><i></i><i></i><i></i><i></i></div></div>
-        <div class="lpin" id="l-pin"><b>MOLO B</b><span id="l-pindist">—</span></div>
-        <div class="lcard">
-          <div class="head"><div class="dir" id="l-ico"></div><div class="txt"><div class="now" id="l-now">Cerco la tua posizione…</div><div class="sub" id="l-sub">Procida 10:40 · Molo B (pontile 9)</div></div><div class="badge" id="l-dist">—</div></div>
-          <div class="foot">Supporto all'orientamento: segui sempre segnaletica e personale del porto.</div>
-        </div>
-      </section>
     </div>
   </div>
 </div>
 <script src="porto3d.js"></script>
-<script src="live.js"></script>
 </body>
 </html>

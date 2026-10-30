@@ -80,3 +80,9 @@ html,body{margin:0;height:100%;font-family:Inter,system-ui,sans-serif;color:var(
 @media (max-width:520px){.photo .cesium-viewer-bottom{top:calc(112px + env(safe-area-inset-top))}}
 .photo .cesium-widget-credits{font-size:9.5px;color:#fff;text-shadow:0 1px 2px rgba(0,0,0,.6)}
 .tgl[hidden]{display:none}
+
+.legend .sign{width:12px;height:12px;border-radius:3px;background:#2EA6FF;border:2px solid #fff;box-shadow:0 0 0 1px #2EA6FF}
+.legend span[hidden]{display:none}
+.modechip{position:absolute;left:12px;top:calc(160px + env(safe-area-inset-top));z-index:5;background:rgba(10,26,51,.85);color:#fff;border-radius:999px;padding:6px 11px;font-size:11.5px;font-weight:700}
+@media (max-width:520px){.modechip{top:calc(122px + env(safe-area-inset-top))}}
+.photo .cesium-viewer-bottom{top:auto!important;bottom:calc(46% + 8px)!important}

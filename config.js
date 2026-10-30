@@ -12,6 +12,7 @@ window.N360 = {
     { name: "Pontile 10", lon: 14.2552074, lat: 40.8379191 },
     { name: "Pontile 11", lon: 14.2555562, lat: 40.8379737 }
   ],
+  terminalOsm: "way/1326131662",   // Stazione marittima del Molo Beverello (OSM)
   walkSpeedKmh: 4.5,
   demoSeconds: 30
 };
