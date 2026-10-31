@@ -1,5 +1,5 @@
 {
- "generated": "2026-10-30T16:38Z",
+ "generated": "2026-10-31T04:02Z",
  "validator": "gtfs-validator-8.0.1-cli.jar",
  "feeds": [
   {
@@ -37,9 +37,9 @@
    ],
    "html": "data/qualita/ANM.html",
    "controlli": {
-    "corse_oggi": 10959,
+    "corse_oggi": 10031,
     "giorni_senza_servizio_prossimi_7": [],
-    "fermate": 2365,
+    "fermate": 2281,
     "fermate_accessibili_dichiarate": 0
    },
    "validita": {
@@ -82,7 +82,7 @@
    ],
    "html": "data/qualita/EAV.html",
    "controlli": {
-    "corse_oggi": 682,
+    "corse_oggi": 586,
     "giorni_senza_servizio_prossimi_7": [],
     "fermate": 127,
     "fermate_accessibili_dichiarate": 0
