@@ -1,2 +1,1 @@
-Overpass non raggiungibilehttps://overpass-api.de/api/interpreter: HTTP Error 502: Bad Gateway
-https://overpass-api.de/api/interpreter: HTTP Error 504: Gateway Timeout
+Overpass non raggiungibile
