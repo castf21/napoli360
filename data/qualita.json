@@ -1,5 +1,5 @@
 {
- "generated": "2026-11-04T04:14Z",
+ "generated": "2026-11-05T04:14Z",
  "validator": "gtfs-validator-8.0.1-cli.jar",
  "feeds": [
   {
@@ -44,7 +44,6 @@
    "controlli": {
     "corse_oggi": 0,
     "giorni_senza_servizio_prossimi_7": [
-     "20261104",
      "20261105",
      "20261106",
      "20261107",
