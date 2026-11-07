@@ -1,5 +1,5 @@
 {
- "generated": "2026-11-06T04:13Z",
+ "generated": "2026-11-07T04:08Z",
  "validator": "gtfs-validator-8.0.1-cli.jar",
  "feeds": [
   {
@@ -44,7 +44,6 @@
    "controlli": {
     "corse_oggi": 0,
     "giorni_senza_servizio_prossimi_7": [
-     "20261106",
      "20261107",
      "20261108"
     ],
@@ -91,7 +90,7 @@
    ],
    "html": "data/qualita/EAV.html",
    "controlli": {
-    "corse_oggi": 682,
+    "corse_oggi": 586,
     "giorni_senza_servizio_prossimi_7": [],
     "fermate": 127,
     "fermate_accessibili_dichiarate": 0
