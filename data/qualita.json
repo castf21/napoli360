@@ -1,13 +1,13 @@
 {
- "generated": "2026-11-08T04:11Z",
+ "generated": "2026-11-09T04:19Z",
  "validator": "gtfs-validator-8.0.1-cli.jar",
  "feeds": [
   {
    "name": "ANM",
    "ok": true,
    "errori": 0,
-   "avvisi": 2188,
-   "info": 1,
+   "avvisi": 2187,
+   "info": 0,
    "principali": [
     {
      "codice": "mixed_case_recommended_field",
@@ -33,19 +33,12 @@
      "codice": "missing_recommended_file",
      "gravita": "WARNING",
      "quanti": 1
-    },
-    {
-     "codice": "trip_coverage_not_active_for_next7_days",
-     "gravita": "WARNING",
-     "quanti": 1
     }
    ],
    "html": "data/qualita/ANM.html",
    "controlli": {
-    "corse_oggi": 0,
-    "giorni_senza_servizio_prossimi_7": [
-     "20261108"
-    ],
+    "corse_oggi": 10900,
+    "giorni_senza_servizio_prossimi_7": [],
     "fermate": 2362,
     "fermate_accessibili_dichiarate": 0
    },
@@ -89,7 +82,7 @@
    ],
    "html": "data/qualita/EAV.html",
    "controlli": {
-    "corse_oggi": 486,
+    "corse_oggi": 682,
     "giorni_senza_servizio_prossimi_7": [],
     "fermate": 127,
     "fermate_accessibili_dichiarate": 0
