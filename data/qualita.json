@@ -1,5 +1,5 @@
 {
- "generated": "2026-11-12T04:15Z",
+ "generated": "2026-11-13T04:17Z",
  "validator": "gtfs-validator-8.0.1-cli.jar",
  "feeds": [
   {
@@ -37,9 +37,9 @@
    ],
    "html": "data/qualita/ANM.html",
    "controlli": {
-    "corse_oggi": 10900,
+    "corse_oggi": 10928,
     "giorni_senza_servizio_prossimi_7": [],
-    "fermate": 2362,
+    "fermate": 2371,
     "fermate_accessibili_dichiarate": 0
    },
    "validita": {
